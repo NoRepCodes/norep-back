@@ -6,7 +6,7 @@ export const test = (req, res) => {
 
 
     console.log('#test')
-    res.send('WORKING')
+    res.send('Proximamente No rep!!!')
 }
 
 
