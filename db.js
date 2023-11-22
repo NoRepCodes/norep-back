@@ -1,7 +1,6 @@
 import { connect,set } from 'mongoose'
-// const { connect, set } = require('mongoose')
-// import dotenv from 'dotenv'
-// dotenv.config()
+import dotenv from 'dotenv'
+dotenv.config()
 const connectDB = async () => {
   try {
     set("strictQuery", false);

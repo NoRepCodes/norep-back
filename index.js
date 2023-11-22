@@ -1,7 +1,7 @@
 import express from 'express'
 import router from './src/routes/search.routes'
 import cors from 'cors'
-// import './db'
+import './db'
 const app = express()
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
