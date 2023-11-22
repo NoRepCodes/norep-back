@@ -7,7 +7,7 @@ export const test = (req, res) => {
 
 
     console.log('#test')
-    res.send('WORKING')
+    res.send('Proximamente No rep!!!')
 }
 
 export const createEvent = async (req, res) => {
@@ -166,4 +166,6 @@ export const addPoints = async (req, res) => {
 //     } catch (error) {
 //         res.status(400).json({ msg: error.message })
 //     }
+// }
+//     res.send('ok')
 // }
