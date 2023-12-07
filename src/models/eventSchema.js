@@ -4,13 +4,21 @@ const objId = SchemaTypes.ObjectId
 
 const EventSchema = new Schema({
     name: String,
-    since: String,
-    until: String,
+    since: Number,
+    until: Number,
     place: String,
-    image:String,
+    image: String,
     categories: [{
-        name: String,
-        wods: [String]
+        type: new Schema({
+            name: String,
+            wods: [{
+                name: String,
+                time_cap: Number,
+                amount_cap: Number,
+                amount_type: String,
+                wod_type: Number,
+            },]
+        },{ timestamps: true })
     }],
 },
     {

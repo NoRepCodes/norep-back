@@ -5,8 +5,10 @@ const TeamSchema = new Schema({
     name: String,
     category_id: String,
     event_id: String,
+    box:String,
     wods:[{
-        points:Number,
+        time:Number,
+        tiebrake:Number,
         amount:Number,
         amount_type:String,
     }]
