@@ -1,6 +1,7 @@
 import Event from "../models/eventSchema"
 import Team from "../models/teamSchema"
 import { deleteImage, deleteImages, uploadImage, uploadImages } from "../helpers/uploadImages";
+import moment from "moment/moment";
 
 
 export const test = (req, res) => {
@@ -44,10 +45,54 @@ export const updateEvent = async (req, res) => {
     }
 }
 export const getEvents = async (req, res) => {
-    console.log('#searchEvents')
+    console.log('#getEvents')
     try {
         const events = await Event.find()
         res.send(events)
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+export const getEventsPlusTeams = async (req, res) => {
+    console.log('#getEventsPlusTeams')
+    try {
+        const events = await Event.find()
+        const teams = await Team.find()
+
+        let data = [events,teams]
+        res.send(data)
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
+// export const getStart = async (req,res)=>{
+//     console.log('#getStart')
+//     try {
+//         const events = await Event.find()
+
+//         let data = [events,+moment()]
+//         res.send(data)
+//     } catch (error) {
+//         res.status(400).json({ msg: error.message })
+//     }
+// }
+
+export const getEventsHome = async (req, res) => {
+    console.log('#getEventsHome')
+    try {
+        const events = await Event.find()
+        // let today = moment()
+        // let ongoing = []
+        // let future = []
+        // events.forEach(event => {
+        //     let days = moment.unix(event.until).diff(today, 'days')
+        //     if (days <= 7 && days >= 0) ongoing.push(event)
+        //     else if (days > 7) future.push(event)
+        // })
+
+        let data = [events,+moment()]
+        res.send(data)
     } catch (error) {
         res.status(400).json({ msg: error.message })
     }
@@ -137,20 +182,37 @@ export const deleteTeam = async (req, res) => {
 export const updateTeam = async (req, res) => {
     console.log('#updateTeam')
     try {
-        const {_id, name } = req.body
-        const result = await Team.findOneAndUpdate({_id},{name},{new:true})
+        const { _id, name } = req.body
+        const result = await Team.findOneAndUpdate({ _id }, { name }, { new: true })
         res.send(result)
     } catch (error) {
         res.status(400).json({ msg: error.message })
     }
 }
 
-export const addPoints = async (req, res) => {
-    console.log('#addPoints')
+export const addWods = async (req, res) => {
+    console.log('#addWods')
     try {
-        const { _id, wods } = req.body
-        // const query = {_id:event_id,'categories._id':category_id,'cateogires.teams._id':team_id}
-        const result = await Team.findOneAndUpdate({_id},{wods},{new:true})
+        const { teams, wod_index } = req.body
+
+        const updateTeam = (team)=>{
+            return new Promise(async (res,rej)=>{
+                res(await Team.findOneAndUpdate({_id:team._id},{
+                    $set:{[`wods.${wod_index}`]:team.wod}
+                },{ new: true}))
+            })
+        }
+        let results = await Promise.all(teams.map(team => updateTeam(team)))
+        res.send(results)
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+export const findTeams = async (req, res) => {
+    console.log('#findTeams')
+    try {
+        const { event_id } = req.body
+        const result = await Team.find({event_id})
         res.send(result)
     } catch (error) {
         res.status(400).json({ msg: error.message })
