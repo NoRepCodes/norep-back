@@ -14,10 +14,15 @@ export const test = (req, res) => {
 export const createEvent = async (req, res) => {
     console.log('#createEvent')
     try {
-        const { name, since, until, place, image, categories, wods } = req.body
-        const result = await Event.create({ name, since, until, place, image, categories, wods })
+        const { name, since, until, place, base64, categories, } = req.body
+        const { secure_url, public_id } = await uploadImage(base64)
+        const result = await Event.create({ name, 
+            since:moment(since).unix(), 
+            until:moment(until).unix(),
+             place, image_url: secure_url, image_id: public_id, categories, wods: [] })
         res.send(result)
     } catch (error) {
+        console.log(error)
         res.status(400).json({ msg: error.message })
     }
 }
@@ -59,7 +64,7 @@ export const getEventsPlusTeams = async (req, res) => {
         const events = await Event.find()
         const teams = await Team.find()
 
-        let data = [events,teams]
+        let data = [events, teams]
         res.send(data)
     } catch (error) {
         res.status(400).json({ msg: error.message })
@@ -91,7 +96,7 @@ export const getEventsHome = async (req, res) => {
         //     else if (days > 7) future.push(event)
         // })
 
-        let data = [events,+moment()]
+        let data = [events, +moment()]
         res.send(data)
     } catch (error) {
         res.status(400).json({ msg: error.message })
@@ -155,14 +160,25 @@ export const updateWods = async (req, res) => {
     }
 }
 
+const uploadTeam = async (event_id, category_id, team)=>{
+    return new Promise(async (res, rej) => {
+        res(await Team.create({event_id, category_id, name:team.name,box:team.box,wods:[]}))
+      })
+}
 
-
-export const addTeam = async (req, res) => {
-    console.log('#addTeam')
+export const addTeams = async (req, res) => {
+    console.log('#addTeams')
     try {
-        const { event_id, category_id, name } = req.body
-        const result = await Team.create({ event_id, category_id, name, wods: [] })
-        res.send(result)
+        const { event_id, category_id, teams } = req.body
+
+        let results = await Promise.all(teams.map(team => uploadTeam(event_id, category_id, team)))
+        // const result = await Team.create({ event_id, category_id, name, wods: [] })
+        // console.log(results)
+        // const newResult = results.map((r,i)=>{
+        //     console.log(r)
+        //     return {}
+        // })
+        res.send(results)
     } catch (error) {
         res.status(400).json({ msg: error.message })
     }
@@ -195,11 +211,12 @@ export const addWods = async (req, res) => {
     try {
         const { teams, wod_index } = req.body
 
-        const updateTeam = (team)=>{
-            return new Promise(async (res,rej)=>{
-                res(await Team.findOneAndUpdate({_id:team._id},{
-                    $set:{[`wods.${wod_index}`]:team.wod}
-                },{ new: true}))
+        const updateTeam = (team) => {
+            const {_id,...wod} = team
+            return new Promise(async (res, rej) => {
+                res(await Team.findOneAndUpdate({ _id }, {
+                    $set: { [`wods.${wod_index}`]: wod }
+                }, { new: true }))
             })
         }
         let results = await Promise.all(teams.map(team => updateTeam(team)))
@@ -212,7 +229,7 @@ export const findTeams = async (req, res) => {
     console.log('#findTeams')
     try {
         const { event_id } = req.body
-        const result = await Team.find({event_id})
+        const result = await Team.find({ event_id })
         res.send(result)
     } catch (error) {
         res.status(400).json({ msg: error.message })
