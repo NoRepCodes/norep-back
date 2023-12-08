@@ -7,7 +7,8 @@ const EventSchema = new Schema({
     since: Number,
     until: Number,
     place: String,
-    image: String,
+    image_url: String,
+    image_id: String,
     categories: [{
         type: new Schema({
             name: String,

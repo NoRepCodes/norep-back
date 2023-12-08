@@ -1,4 +1,4 @@
-import cloudinary from 'cloudinary'
+import cloudinary from './cloudinary'
 
 export const uploadImage = async (img) => {
   const { secure_url, public_id } = await cloudinary.uploader.upload(img, {})
