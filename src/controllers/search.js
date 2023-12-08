@@ -2,13 +2,15 @@ import Event from "../models/eventSchema"
 import Team from "../models/teamSchema"
 import { deleteImage, deleteImages, uploadImage, uploadImages } from "../helpers/uploadImages";
 import moment from "moment/moment";
-
+import dotenv from 'dotenv'
+dotenv.config()
 
 export const test = (req, res) => {
 
 
     console.log('#test')
-    res.send('Proximamente No rep!!!')
+    // res.send('Proximamente No rep!!!')
+    res.send(process.env.MONGODB_URI)
 }
 
 export const createEvent = async (req, res) => {
