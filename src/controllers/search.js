@@ -9,8 +9,8 @@ export const test = (req, res) => {
 
 
     console.log('#test')
-    // res.send('Proximamente No rep!!!')
-    res.send(process.env.MONGODB_URI)
+    res.send('Proximamente No rep!!!')
+    // res.send(process.env.MONGODB_URI)
 }
 
 export const createEvent = async (req, res) => {
