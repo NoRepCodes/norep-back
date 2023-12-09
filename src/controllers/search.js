@@ -2,13 +2,15 @@ import Event from "../models/eventSchema"
 import Team from "../models/teamSchema"
 import { deleteImage, deleteImages, uploadImage, uploadImages } from "../helpers/uploadImages";
 import moment from "moment/moment";
-
+import dotenv from 'dotenv'
+dotenv.config()
 
 export const test = (req, res) => {
 
 
     console.log('#test')
-    res.send('WORKING')
+    // res.send('Proximamente No rep!!!')
+    res.send(process.env.MONGODB_URI)
 }
 
 export const createEvent = async (req, res) => {
@@ -245,4 +247,6 @@ export const findTeams = async (req, res) => {
 //     } catch (error) {
 //         res.status(400).json({ msg: error.message })
 //     }
+// }
+//     res.send('ok')
 // }
