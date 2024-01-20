@@ -3,7 +3,7 @@ const router = Router()
 
 import {findTeams,test,deleteEvent,updateEvent,getEvents, createEvent, updateCategory, addTeams,  addWods, addCategory, deleteCategory, deleteTeam,updateTeam, updateWods, getEventsHome, getEventsPlusTeams, toggleUpdating} from '../controllers/search'
 
-
+// wtf
 router.get('/', test)
 
 router.post('/createEvent', createEvent)
