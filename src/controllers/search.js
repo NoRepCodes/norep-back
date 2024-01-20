@@ -9,8 +9,8 @@ export const test = (req, res) => {
 
 
     console.log('#test')
-    // res.send('Proximamente No rep!!!')
-    res.send(process.env.MONGODB_URI)
+    res.send('Proximamente No rep!!!')
+    // res.send(process.env.MONGODB_URI)
 }
 
 export const createEvent = async (req, res) => {
@@ -21,7 +21,7 @@ export const createEvent = async (req, res) => {
         const result = await Event.create({ name, 
             since:moment(since).unix(), 
             until:moment(until).unix(),
-             place, image_url: secure_url, image_id: public_id, categories, wods: [] })
+             place, image_url: secure_url, image_id: public_id, categories, wods: [],updating:false })
         res.send(result)
     } catch (error) {
         console.log(error)
@@ -232,6 +232,17 @@ export const findTeams = async (req, res) => {
     try {
         const { event_id } = req.body
         const result = await Team.find({ event_id })
+        res.send(result)
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
+export const toggleUpdating = async (req, res) => {
+    console.log('#toggleUpdating')
+    try {
+        const { event_id,state } = req.body
+        const result = await Event.find({ event_id},{updating:state})
         res.send(result)
     } catch (error) {
         res.status(400).json({ msg: error.message })

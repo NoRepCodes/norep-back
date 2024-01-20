@@ -10,7 +10,7 @@ dotenv.config()
 cloudinary.config({
     cloud_name: 'dtdgl3ajp',
     api_key: '331735467981966',
-    api_secret: '4iq8RwNvVUkxRGJzVe7YAqiZvjA"',
+    api_secret: '4iq8RwNvVUkxRGJzVe7YAqiZvjA',
     secure:true,
 });
 

@@ -9,6 +9,7 @@ const EventSchema = new Schema({
     place: String,
     image_url: String,
     image_id: String,
+    updating: Boolean,
     categories: [{
         type: new Schema({
             name: String,
