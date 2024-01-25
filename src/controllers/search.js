@@ -242,8 +242,9 @@ export const toggleUpdating = async (req, res) => {
     console.log('#toggleUpdating')
     try {
         const { event_id,state } = req.body
-        const result = await Event.find({ event_id},{updating:state})
+        const result = await Event.findOneAndUpdate({_id: event_id},{$set:{updating:state}})
         res.send(result)
+        
     } catch (error) {
         res.status(400).json({ msg: error.message })
     }
