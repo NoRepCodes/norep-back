@@ -1,8 +1,12 @@
 import cloudinary from './cloudinary'
 
 export const uploadImage = async (img) => {
-  const { secure_url, public_id } = await cloudinary.uploader.upload(img, {})
-  return { secure_url, public_id }
+  if(typeof img === 'string'){
+    const { secure_url, public_id } = await cloudinary.uploader.upload(img, {})
+    return { secure_url, public_id }
+  }else if (typeof img === 'object' && img.secure_url && img.public_id){
+    return {...img}
+  }
 }
 
 export const uploadImages = async (arrImages) => {
