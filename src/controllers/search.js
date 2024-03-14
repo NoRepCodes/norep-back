@@ -1,8 +1,10 @@
 import Event from "../models/eventSchema"
 import Team from "../models/teamSchema"
+import Admin from "../models/adminSchema"
 import { deleteImage, deleteImages, uploadImage, uploadImages } from "../helpers/uploadImages";
 import moment from "moment/moment";
 import dotenv from 'dotenv'
+import bcrypt from 'bcrypt'
 dotenv.config()
 
 export const test = (req, res) => {
@@ -59,8 +61,8 @@ export const updateEvent = async (req, res) => {
             until: moment(until).unix(),
             place, secure_url, public_id, accesible, categories, partners
         }, { new: true })
-        await categToDelete.map(async(categ) => {
-            await Team.deleteMany({category_id:categ})
+        await categToDelete.map(async (categ) => {
+            await Team.deleteMany({ category_id: categ })
             return
         })
 
@@ -188,9 +190,9 @@ const uploadTeam = async (event_id, category_id, team) => {
         res(await Team.create({ event_id, category_id, name: team.name, box: team.box, wods: [] }))
     })
 }
-const removeTeam = async (_id)=>{
+const removeTeam = async (_id) => {
     return new Promise(async (res, rej) => {
-        res(await Team.findOneAndDelete({_id}))
+        res(await Team.findOneAndDelete({ _id }))
     })
 }
 
@@ -236,7 +238,7 @@ export const updateTeam = async (req, res) => {
 export const editTeams = async (req, res) => {
     console.log('#editTeams')
     try {
-        const { event_id, category_id, teams,toDelete } = req.body
+        const { event_id, category_id, teams, toDelete } = req.body
 
         let results = await Promise.all(teams.map(team => uploadTeam(event_id, category_id, team)))
         await Promise.all(toDelete.map(id => removeTeam(id)))
@@ -287,6 +289,61 @@ export const toggleUpdating = async (req, res) => {
         res.status(400).json({ msg: error.message })
     }
 }
+
+
+
+export const createAdmin = async (req, res) => {
+    console.log('#createAdmin')
+    try {
+        const { username, pass } = req.body
+        bcrypt.hash(pass, 7, async (err, hash) => {
+            // Store hash in your password DB.
+            console.log(hash)
+            const result = await Admin.create({ username, password: hash })
+            res.send(result)
+        });
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
+export const deleteAdmin = async (req, res) => {
+    console.log('#createAdmin')
+    try {
+        const { _id } = req.body
+        const result = await Admin.delete({_id})
+        res.send(result)
+
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
+export const loginAdmin = async (req,res)=>{
+    console.log('#loginAdmin')
+    try {
+        const { username,password } = req.body
+        const adm = await Admin.findOne({username})
+        if(adm){
+            console.log('ok?0')
+            bcrypt.compare(password, adm.password).then(function(result) {
+                console.log('ok?1')
+                if(result){
+                    res.send({
+                        username:adm.username,
+                        _id:adm._id
+                    })
+                }else{
+                    res.status(404).json({ msg: 'Usuario o contraseña incorrectos' })
+                }
+            });
+
+        }
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
 
 
 
