@@ -1,8 +1,10 @@
 import Event from "../models/eventSchema"
 import Team from "../models/teamSchema"
+import Admin from "../models/adminSchema"
 import { deleteImage, deleteImages, uploadImage, uploadImages } from "../helpers/uploadImages";
 import moment from "moment/moment";
 import dotenv from 'dotenv'
+import bcrypt from 'bcrypt'
 dotenv.config()
 
 export const test = (req, res) => {
@@ -16,13 +18,18 @@ export const test = (req, res) => {
 export const createEvent = async (req, res) => {
     console.log('#createEvent')
     try {
-        const { name, since, until, place, base64, categories, } = req.body
+        const { name, since, until, place, accesible, base64, categories, partners: pimages } = req.body
         const { secure_url, public_id } = await uploadImage(base64)
-        const result = await Event.create({ name, 
-            since:moment(since).unix(), 
-            until:moment(until).unix(),
-             place, image_url: secure_url, image_id: public_id, categories, wods: [],updating:false })
+        const partners = await uploadImages(pimages)
+        const result = await Event.create({
+            name,
+            since: moment(since).unix(),
+            until: moment(until).unix(),
+            place, secure_url, public_id, accesible, categories, wods: [], partners, updating: false
+        })
         res.send(result)
+        // console.log(req.body)
+        // res.status(400).json({ msg: 'test' })
     } catch (error) {
         console.log(error)
         res.status(400).json({ msg: error.message })
@@ -44,10 +51,26 @@ export const deleteEvent = async (req, res) => {
 export const updateEvent = async (req, res) => {
     console.log('#updateEvent')
     try {
-        const { _id, name, since, until, place, image } = req.body
-        const result = await Event.findOneAndUpdate({ _id }, { name, since, until, place, image }, { new: true })
+        const { name, since, until, place, accesible, image, categories, partners: pimages, toDelete, _id, categToDelete } = req.body
+        const { secure_url, public_id } = await uploadImage(image)
+        const partners = await uploadImages(pimages)
+        await deleteImages(toDelete)
+        const result = await Event.findOneAndUpdate({ _id }, {
+            name,
+            since: moment(since).unix(),
+            until: moment(until).unix(),
+            place, secure_url, public_id, accesible, categories, partners
+        }, { new: true })
+        await categToDelete.map(async (categ) => {
+            await Team.deleteMany({ category_id: categ })
+            return
+        })
+
         res.send(result)
+        // console.log(req.body)
+        // res.status(400).json({ msg: 'test' })
     } catch (error) {
+        console.log(error)
         res.status(400).json({ msg: error.message })
     }
 }
@@ -162,10 +185,15 @@ export const updateWods = async (req, res) => {
     }
 }
 
-const uploadTeam = async (event_id, category_id, team)=>{
+const uploadTeam = async (event_id, category_id, team) => {
     return new Promise(async (res, rej) => {
-        res(await Team.create({event_id, category_id, name:team.name,box:team.box,wods:[]}))
-      })
+        res(await Team.create({ event_id, category_id, name: team.name, box: team.box, wods: [] }))
+    })
+}
+const removeTeam = async (_id) => {
+    return new Promise(async (res, rej) => {
+        res(await Team.findOneAndDelete({ _id }))
+    })
 }
 
 export const addTeams = async (req, res) => {
@@ -207,6 +235,18 @@ export const updateTeam = async (req, res) => {
         res.status(400).json({ msg: error.message })
     }
 }
+export const editTeams = async (req, res) => {
+    console.log('#editTeams')
+    try {
+        const { event_id, category_id, teams, toDelete } = req.body
+
+        let results = await Promise.all(teams.map(team => uploadTeam(event_id, category_id, team)))
+        await Promise.all(toDelete.map(id => removeTeam(id)))
+        res.send(results)
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
 
 export const addWods = async (req, res) => {
     console.log('#addWods')
@@ -214,7 +254,7 @@ export const addWods = async (req, res) => {
         const { teams, wod_index } = req.body
 
         const updateTeam = (team) => {
-            const {_id,...wod} = team
+            const { _id, ...wod } = team
             return new Promise(async (res, rej) => {
                 res(await Team.findOneAndUpdate({ _id }, {
                     $set: { [`wods.${wod_index}`]: wod }
@@ -241,13 +281,69 @@ export const findTeams = async (req, res) => {
 export const toggleUpdating = async (req, res) => {
     console.log('#toggleUpdating')
     try {
-        const { event_id,state } = req.body
-        const result = await Event.find({ event_id},{updating:state})
+        const { event_id, state } = req.body
+        const result = await Event.findOneAndUpdate({ _id: event_id }, { $set: { updating: state } })
         res.send(result)
+
     } catch (error) {
         res.status(400).json({ msg: error.message })
     }
 }
+
+
+
+export const createAdmin = async (req, res) => {
+    console.log('#createAdmin')
+    try {
+        const { username, pass } = req.body
+        bcrypt.hash(pass, 7, async (err, hash) => {
+            // Store hash in your password DB.
+            console.log(hash)
+            const result = await Admin.create({ username, password: hash })
+            res.send(result)
+        });
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
+export const deleteAdmin = async (req, res) => {
+    console.log('#createAdmin')
+    try {
+        const { _id } = req.body
+        const result = await Admin.delete({_id})
+        res.send(result)
+
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
+export const loginAdmin = async (req,res)=>{
+    console.log('#loginAdmin')
+    try {
+        const { username,password } = req.body
+        const adm = await Admin.findOne({username})
+        if(adm){
+            console.log('ok?0')
+            bcrypt.compare(password, adm.password).then(function(result) {
+                console.log('ok?1')
+                if(result){
+                    res.send({
+                        username:adm.username,
+                        _id:adm._id
+                    })
+                }else{
+                    res.status(404).json({ msg: 'Usuario o contraseña incorrectos' })
+                }
+            });
+
+        }
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
+
 
 
 

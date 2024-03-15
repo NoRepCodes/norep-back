@@ -7,9 +7,11 @@ const EventSchema = new Schema({
     since: Number,
     until: Number,
     place: String,
-    image_url: String,
-    image_id: String,
+    secure_url: String,
+    public_id: String,
     updating: Boolean,
+    accesible:Boolean,
+    partners: Array,
     categories: [{
         type: new Schema({
             name: String,
@@ -27,6 +29,7 @@ const EventSchema = new Schema({
         timestamps: true,
     }
 );
+/// WODS GUIDE 1=AMRAP 2=FORTIME 3=RM 4=CIRCUIT
 
 // EventSchema.methods.changeName = function () {
 //     return this.name = 'Testing here'

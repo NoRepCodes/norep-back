@@ -11,6 +11,7 @@ const TeamSchema = new Schema({
         tiebrake:Number,
         amount:Number,
         amount_type:String,
+        penalty:Number
     }]
 },
     {
