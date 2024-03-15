@@ -1,14 +1,11 @@
 import { connect,set } from 'mongoose'
 import dotenv from 'dotenv'
 dotenv.config()
-
-const testhere = process.env.MONGODB_URI_TEST
-
 const connectDB = async () => {
   try {
     set("strictQuery", false);
 
-    await connect(testhere)
+    await connect('mongodb+srv://norepcode:Crossfit2023@norep.rkqhfdi.mongodb.net/tests')
 
       .then(db => console.log('Database is connected'))
       .catch(err => console.log(err))
