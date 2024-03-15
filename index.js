@@ -4,6 +4,7 @@ import cors from 'cors'
 import './db'
 const app = express()
 
+// new try
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(cors({
