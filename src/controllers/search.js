@@ -11,8 +11,8 @@ export const test = (req, res) => {
 
 
     console.log('#test')
-    // res.send('Proximamente No rep!!!')
-    res.send(process.env.MONGODB_URI_TEST)
+    res.send('Proximamente No rep!!!')
+    // res.send(process.env.MONGODB_URI_TEST)
 }
 
 export const createEvent = async (req, res) => {
@@ -38,9 +38,17 @@ export const createEvent = async (req, res) => {
 export const deleteEvent = async (req, res) => {
     console.log('#deleteEvent')
     try {
-        const { _id, password } = req.body
-        const result = await Event.deleteOne({ _id })
-        if (result.deletedCount > 0) return res.send(result)
+        const { event } = req.body
+        const result = await Event.deleteOne({ _id:event._id })
+        if (result.deletedCount > 0) {
+            await deleteImage(event.public_id)
+            let aux = []
+            event.partners.forEach(p => {
+                aux.push(p.public_id)
+            });
+            await deleteImages(aux)
+            return res.send(result)
+        }
         else return res.status(404).json({ msg: 'Evento no encontrado' })
 
     } catch (error) {
