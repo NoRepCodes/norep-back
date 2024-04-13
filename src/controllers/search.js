@@ -63,7 +63,7 @@ export const updateEvent = async (req, res) => {
         const { secure_url, public_id } = await uploadImage(image)
         const partners = await uploadImages(pimages)
         await deleteImages(toDelete)
-        console.log(categories)
+
         const result = await Event.findOneAndUpdate({ _id }, {
             $set: {
                 name,
@@ -123,6 +123,7 @@ export const getEventsHome = async (req, res) => {
     if (debug) console.log('#getEventsHome')
     try {
         const events = await Event.find()
+        // const teams = await Team.find()
         // let today = moment()
         // let ongoing = []
         // let future = []
@@ -370,6 +371,19 @@ export const loginAdmin = async (req, res) => {
     }
 }
 
+export const searchTeam = async (req, res) => {
+    if (debug) console.log('#loginAdmin')
+    try {
+        const { searchName } = req.body
+        const result = await Team.find({
+            name: new RegExp(searchName, "i")
+        })
+        res.send(result)
+
+    } catch (error) {
+        res.status(400).json({ msg: error.message })
+    }
+}
 
 
 
