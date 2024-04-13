@@ -1,7 +1,7 @@
 import {Router} from 'express'
 const router = Router()
 
-import {findTeams,test,deleteEvent,updateEvent,getEvents, createEvent, updateCategory, addTeams,  addWods, addCategory, deleteCategory, deleteTeam,updateTeam, updateWods, getEventsHome, getEventsPlusTeams, toggleUpdating, editTeams, createAdmin, deleteAdmin, loginAdmin} from '../controllers/search'
+import {findTeams,test,deleteEvent,updateEvent,getEvents, createEvent, updateCategory, addTeams,  addWods, addCategory, deleteCategory, deleteTeam,updateTeam, updateWods, getEventsHome, getEventsPlusTeams, toggleUpdating, editTeams, createAdmin, deleteAdmin, loginAdmin, searchTeam} from '../controllers/search'
 
 // wtf
 router.get('/test', test)
@@ -33,6 +33,9 @@ router.post('/toggleUpdating', toggleUpdating)
 router.post('/createAdmin',createAdmin)
 router.post('/deleteAdmin',deleteAdmin)
 router.post('/loginAdmin',loginAdmin)
+
+router.post('/searchTeam',searchTeam)
+
 
 export default router
 // module.exports = router
