@@ -325,7 +325,6 @@ export const createAdmin = async (req, res) => {
         const { username, pass } = req.body
         bcrypt.hash(pass, 7, async (err, hash) => {
             // Store hash in your password DB.
-            console.log(hash)
             const result = await Admin.create({ username, password: hash })
             res.send(result)
         });
@@ -352,9 +351,7 @@ export const loginAdmin = async (req, res) => {
         const { username, password } = req.body
         const adm = await Admin.findOne({ username })
         if (adm) {
-            console.log('ok?0')
             bcrypt.compare(password, adm.password).then(function (result) {
-                console.log('ok?1')
                 if (result) {
                     res.send({
                         username: adm.username,
