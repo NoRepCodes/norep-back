@@ -6,17 +6,17 @@ import moment from "moment/moment";
 import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
 dotenv.config()
-
+const debug = false
 export const test = (req, res) => {
 
 
-    console.log('#test')
+    if (debug) console.log('#test')
     res.send('Proximamente No rep!!!')
     // res.send(process.env.MONGODB_URI_TEST)
 }
 
 export const createEvent = async (req, res) => {
-    console.log('#createEvent')
+    if (debug) console.log('#createEvent')
     try {
         const { name, since, until, place, accesible, base64, categories, partners: pimages } = req.body
         const { secure_url, public_id } = await uploadImage(base64)
@@ -36,10 +36,10 @@ export const createEvent = async (req, res) => {
     }
 }
 export const deleteEvent = async (req, res) => {
-    console.log('#deleteEvent')
+    if (debug) console.log('#deleteEvent')
     try {
         const { event } = req.body
-        const result = await Event.deleteOne({ _id:event._id })
+        const result = await Event.deleteOne({ _id: event._id })
         if (result.deletedCount > 0) {
             await deleteImage(event.public_id)
             let aux = []
@@ -57,17 +57,20 @@ export const deleteEvent = async (req, res) => {
     res.send('ok')
 }
 export const updateEvent = async (req, res) => {
-    console.log('#updateEvent')
+    if (debug) console.log('#updateEvent')
     try {
         const { name, since, until, place, accesible, image, categories, partners: pimages, toDelete, _id, categToDelete } = req.body
         const { secure_url, public_id } = await uploadImage(image)
         const partners = await uploadImages(pimages)
         await deleteImages(toDelete)
+        console.log(categories)
         const result = await Event.findOneAndUpdate({ _id }, {
-            name,
-            since: moment(since).unix(),
-            until: moment(until).unix(),
-            place, secure_url, public_id, accesible, categories, partners
+            $set: {
+                name,
+                since: moment(since).unix(),
+                until: moment(until).unix(),
+                place, secure_url, public_id, accesible, categories, partners
+            }
         }, { new: true })
         await categToDelete.map(async (categ) => {
             await Team.deleteMany({ category_id: categ })
@@ -83,7 +86,7 @@ export const updateEvent = async (req, res) => {
     }
 }
 export const getEvents = async (req, res) => {
-    console.log('#getEvents')
+    if (debug) console.log('#getEvents')
     try {
         const events = await Event.find()
         res.send(events)
@@ -92,7 +95,7 @@ export const getEvents = async (req, res) => {
     }
 }
 export const getEventsPlusTeams = async (req, res) => {
-    console.log('#getEventsPlusTeams')
+    if (debug) console.log('#getEventsPlusTeams')
     try {
         const events = await Event.find()
         const teams = await Team.find()
@@ -105,7 +108,7 @@ export const getEventsPlusTeams = async (req, res) => {
 }
 
 // export const getStart = async (req,res)=>{
-//     console.log('#getStart')
+//     if(debug) console.log('#getStart')
 //     try {
 //         const events = await Event.find()
 
@@ -117,7 +120,7 @@ export const getEventsPlusTeams = async (req, res) => {
 // }
 
 export const getEventsHome = async (req, res) => {
-    console.log('#getEventsHome')
+    if (debug) console.log('#getEventsHome')
     try {
         const events = await Event.find()
         // let today = moment()
@@ -138,7 +141,7 @@ export const getEventsHome = async (req, res) => {
 
 
 export const updateCategory = async (req, res) => {
-    console.log('#updateCategory')
+    if (debug) console.log('#updateCategory')
     try {
         const { event_id, category_id, name } = req.body
         const query = { _id: event_id, 'categories._id': category_id }
@@ -152,7 +155,7 @@ export const updateCategory = async (req, res) => {
 }
 
 export const addCategory = async (req, res) => {
-    console.log('#addCategory')
+    if (debug) console.log('#addCategory')
     try {
         const { event_id, name } = req.body
         const query = { _id: event_id }
@@ -166,7 +169,7 @@ export const addCategory = async (req, res) => {
 }
 
 export const deleteCategory = async (req, res) => {
-    console.log('#deleteCategory')
+    if (debug) console.log('#deleteCategory')
     try {
         const { event_id, category_id } = req.body
         const query = { _id: event_id }
@@ -180,7 +183,7 @@ export const deleteCategory = async (req, res) => {
 }
 
 export const updateWods = async (req, res) => {
-    console.log('#updateWods')
+    if (debug) console.log('#updateWods')
     try {
         const { event_id, category_id, wods } = req.body
         const query = { _id: event_id, 'categories._id': category_id }
@@ -204,8 +207,19 @@ const removeTeam = async (_id) => {
     })
 }
 
+const editTeam = async (category_id, team) => {
+    return new Promise(async (res, rej) => {
+        res(await Team.findOneAndUpdate({ category_id, _id: team._id }, {
+            $set: {
+                name: team.name,
+                box: team.box,
+            }
+        }, { new: true }))
+    })
+}
+
 export const addTeams = async (req, res) => {
-    console.log('#addTeams')
+    if (debug) console.log('#addTeams')
     try {
         const { event_id, category_id, teams } = req.body
 
@@ -223,7 +237,7 @@ export const addTeams = async (req, res) => {
 }
 
 export const deleteTeam = async (req, res) => {
-    console.log('#deleteTeam')
+    if (debug) console.log('#deleteTeam')
     try {
         const { _id } = req.body
         const result = await Team.deleteOne({ _id })
@@ -234,7 +248,7 @@ export const deleteTeam = async (req, res) => {
     }
 }
 export const updateTeam = async (req, res) => {
-    console.log('#updateTeam')
+    if (debug) console.log('#updateTeam')
     try {
         const { _id, name } = req.body
         const result = await Team.findOneAndUpdate({ _id }, { name }, { new: true })
@@ -244,20 +258,24 @@ export const updateTeam = async (req, res) => {
     }
 }
 export const editTeams = async (req, res) => {
-    console.log('#editTeams')
+    if (debug) console.log('#editTeams')
     try {
         const { event_id, category_id, teams, toDelete } = req.body
-
-        let results = await Promise.all(teams.map(team => uploadTeam(event_id, category_id, team)))
+        await Promise.all(teams.map(async (team) => {
+            if (team.new) await uploadTeam(event_id, category_id, team)
+            else await editTeam(category_id, team)
+        }))
         await Promise.all(toDelete.map(id => removeTeam(id)))
-        res.send(results)
+
+        const result = await Team.find({ event_id })
+        res.send(result)
     } catch (error) {
         res.status(400).json({ msg: error.message })
     }
 }
 
 export const addWods = async (req, res) => {
-    console.log('#addWods')
+    if (debug) console.log('#addWods')
     try {
         const { teams, wod_index } = req.body
 
@@ -276,7 +294,7 @@ export const addWods = async (req, res) => {
     }
 }
 export const findTeams = async (req, res) => {
-    console.log('#findTeams')
+    if (debug) console.log('#findTeams')
     try {
         const { event_id } = req.body
         const result = await Team.find({ event_id })
@@ -287,7 +305,7 @@ export const findTeams = async (req, res) => {
 }
 
 export const toggleUpdating = async (req, res) => {
-    console.log('#toggleUpdating')
+    if (debug) console.log('#toggleUpdating')
     try {
         const { event_id, state } = req.body
         const result = await Event.findOneAndUpdate({ _id: event_id }, { $set: { updating: state } })
@@ -301,7 +319,7 @@ export const toggleUpdating = async (req, res) => {
 
 
 export const createAdmin = async (req, res) => {
-    console.log('#createAdmin')
+    if (debug) console.log('#createAdmin')
     try {
         const { username, pass } = req.body
         bcrypt.hash(pass, 7, async (err, hash) => {
@@ -316,10 +334,10 @@ export const createAdmin = async (req, res) => {
 }
 
 export const deleteAdmin = async (req, res) => {
-    console.log('#createAdmin')
+    if (debug) console.log('#createAdmin')
     try {
         const { _id } = req.body
-        const result = await Admin.delete({_id})
+        const result = await Admin.delete({ _id })
         res.send(result)
 
     } catch (error) {
@@ -327,21 +345,21 @@ export const deleteAdmin = async (req, res) => {
     }
 }
 
-export const loginAdmin = async (req,res)=>{
-    console.log('#loginAdmin')
+export const loginAdmin = async (req, res) => {
+    if (debug) console.log('#loginAdmin')
     try {
-        const { username,password } = req.body
-        const adm = await Admin.findOne({username})
-        if(adm){
+        const { username, password } = req.body
+        const adm = await Admin.findOne({ username })
+        if (adm) {
             console.log('ok?0')
-            bcrypt.compare(password, adm.password).then(function(result) {
+            bcrypt.compare(password, adm.password).then(function (result) {
                 console.log('ok?1')
-                if(result){
+                if (result) {
                     res.send({
-                        username:adm.username,
-                        _id:adm._id
+                        username: adm.username,
+                        _id: adm._id
                     })
-                }else{
+                } else {
                     res.status(404).json({ msg: 'Usuario o contraseña incorrectos' })
                 }
             });
@@ -356,7 +374,7 @@ export const loginAdmin = async (req,res)=>{
 
 
 // export const namehere = async (req,res)=>{
-//     console.log('#namehere')
+//     if(debug) console.log('#namehere')
 //     try {
 //         res.send('ok')
 //     } catch (error) {

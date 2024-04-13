@@ -7,10 +7,10 @@ const TeamSchema = new Schema({
     event_id: String,
     box:String,
     wods:[{
-        time:Number,
-        tiebrake:Number,
         amount:Number,
         amount_type:String,
+        time:Number,
+        tiebrake:Number,
         penalty:Number
     }]
 },
