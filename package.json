@@ -4,12 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.ts",
-    "dev": "nodemon src/index.ts",
-    "build": "rimraf dist && tsc",
-    "ts.check": "tsc --project tsconfig.json",
-    "add-build": "git add dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "start": "node build/index.js",
+    "dev": "nodemon index.ts"
   },
   "keywords": [],
   "author": "",
@@ -26,7 +24,6 @@
     "mongoose": "^6.8.3",
     "nodemailer": "^6.9.14",
     "uuid": "^9.0.0"
-    
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -34,13 +31,6 @@
     "@types/node": "^20.12.8",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "@babel/core": "^7.23.5",
-    "@babel/preset-env": "^7.23.5",
-    "@babel/preset-typescript": "^7.23.3",
-    "@babel/register": "^7.22.15",
-    "@types/mongoose": "^5.11.97",
-    "pre-commit": "^1.2.2",
-    "rimraf": "^5.0.5"
+    "typescript": "^5.4.5"
   }
 }

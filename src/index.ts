@@ -19,7 +19,7 @@ app.use(routeEvent)
 app.use(routeUser)
 app.use(routeGuest)
 
-app.listen(4000, () => {
+app.listen(process.env.PORT || 4000, () => {
     console.log('Server listen on port', 4000)
 })
 
