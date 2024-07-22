@@ -30,7 +30,7 @@ app.listen(process.env.PORT || 4000, () => {
  * - - Create Event ✅
  * - - Update Event ✅
  * - - Delete Event ✅
- * 
+ * -
  * - - Create Category ➰ Update Event
  * - - Update Category ➰ Update Event
  * - - Delete Category ➰ Update Event
