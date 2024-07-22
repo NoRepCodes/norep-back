@@ -60,4 +60,20 @@ app.listen(4000, () => {
  * 
  * -- SEE VERCEL USAGE AND TAKE ACTIONS
  * - REDUCE BANDWITH COMPRESSING IMAGES
+ * 
+ * // {
+//     "version": 2,
+//     "builds": [
+//       {
+//         "src": "./index.js",
+//         "use": "@vercel/node"
+//       }
+//     ],
+//     "routes": [
+//       {
+//         "src": "/(.*)",
+//         "dest": "/"
+//       }
+//     ]
+// }
  */
