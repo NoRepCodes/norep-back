@@ -1,5 +1,5 @@
-import { Schema, model, SchemaTypes, Document } from 'mongoose'
-const objId = SchemaTypes.ObjectId
+import { Schema, model, SchemaTypes } from 'mongoose'
+// const objId = SchemaTypes.ObjectId
 
 const wodRes = new Schema({
     team_id: { type: String, required: true },
