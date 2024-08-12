@@ -66,3 +66,30 @@ export const deleteImages = async (arrImages: Image[]) => {
 
   return true;
 };
+
+
+/**
+ * NOREP 2.0 (en desarrollo)
+ * 
+ * Novedades:
+ * -- Inicio de sesion:
+ * -- -- Los usuarios y administradores iniciarán sesión desde su respectiva pantalla
+ * -- -- Los administradores ahora inician sus usuarios con "@" (para diferenciarlos de los correos de los usuarios normales)
+ * 
+ * -- Registro:
+ * -- -- Formulario de registro con sus campos correspondientes
+ * 
+ * -- Creacion de evento:
+ * -- -- Filtros para las categorias, asi como campos para el precio en $ y las fechas de inscripcion y cierre de inscripciones
+ * -- -- Equipos Manuales: una vez seleccionada la casilla no se puede modificar!!! Esta opcion es para habilitar la tabla vieja (subir los equipos a mano), en caso de estar deshabilitada, las categorias tendran las opciones de filtro y los usuarios podran inscribirse una vez iniciada su sesion.
+ * 
+ * -- Solicitudes:
+ * -- -- Una vez iniciada la sesion como administrador se podran ver todos los "Tickets" que hayan creado los usuarios para solicitar unirse a las categorias. En estos tickets esta la fecha del mismo, el nombre de los integrantes, el numero de tlf del capitan, el nro de transferencia y el comprobante del pago. Nota: Una vez aceptada o rechazada la solicitud, la informacion se elimina por completo, aún estoy cuestionando si guardarla como respaldo o no, ya que en caso de hacer un respaldo, mucha informacion se va a guardar en la base de datos y eso es $$$
+ * 
+ * -- -- Tabla
+ * -- SI DIOS QUEIRE Y LA VIRGEN YA NO SE DUPLICAN LOS EQUIPOS
+ * -- La tabla no fue actualizada mas allá del nuevo esquema para los equipos con multiples integrantes
+ * 
+ * -- Registro al Evento
+ * -- -- Escuchar audio
+ */

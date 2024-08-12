@@ -8,22 +8,19 @@ import {
 import { RequestHandler } from "express";
 import Event from "../models/eventSchema";
 import Wod from "../models/wodSchema";
-import moment from "moment";
-import { CategoryType, EventType, ResultType, WodType } from "../types/event.t";
-import { AnyArray, Types } from "mongoose";
-const debug = false;
+import User from "../models/wodSchema";
+// import moment from "moment";
+import { EventType, ResultType, WodType } from "../types/event.t";
+import { Types } from "mongoose";
+const debug = true;
 // EVENTS
-type CreateEventParams = EventType & {
-  since: string;
-  until: string;
-  register_time: { since: string; until: string };
-};
 export const createEvent: RequestHandler = async (req, res) => {
   // if (debug) console.log('#createEvent')
   try {
     const {
       name,
       since,
+      dues,
       until,
       place,
       accesible,
@@ -32,7 +29,7 @@ export const createEvent: RequestHandler = async (req, res) => {
       partners: pimages,
       register_time,
       manual_teams,
-    } = <CreateEventParams>req.body;
+    } = <EventType>req.body;
     const { secure_url, public_id } = await uploadImage({
       secure_url: s_url,
       public_id: "_",
@@ -40,11 +37,10 @@ export const createEvent: RequestHandler = async (req, res) => {
     const partners = await uploadImages(pimages);
     await Event.create({
       name,
-      since: since,
-      until: until,
-      // since: moment(new Date(since)).unix(),
-      // until: moment(new Date(until)).unix(),
+      since,
+      until,
       place,
+      dues,
       secure_url,
       public_id,
       accesible,
@@ -65,11 +61,6 @@ export const createEvent: RequestHandler = async (req, res) => {
   }
 };
 
-type UpdateEventParams = EventType & {
-  edit: boolean;
-  since: string;
-  until: string;
-};
 export const updateEvent: RequestHandler = async (req, res) => {
   // if (debug) console.log('#updateEvent')
   try {
@@ -78,6 +69,7 @@ export const updateEvent: RequestHandler = async (req, res) => {
       name,
       since,
       until,
+      dues,
       place,
       accesible,
       categories,
@@ -86,7 +78,7 @@ export const updateEvent: RequestHandler = async (req, res) => {
       partners: pimages,
       manual_teams,
       register_time,
-    } = <UpdateEventParams>req.body;
+    } = <EventType>req.body;
 
     const evnt = await Event.findById(_id);
     if (evnt === null || evnt === undefined)
@@ -118,8 +110,7 @@ export const updateEvent: RequestHandler = async (req, res) => {
     evnt.name = name;
     evnt.since = since;
     evnt.until = until;
-    // evnt.since = moment(new Date(since)).unix()
-    // evnt.until = moment(new Date(until)).unix()
+    evnt.dues = dues;
     evnt.partners = partners;
     evnt.place = place;
     evnt.accesible = accesible;
@@ -161,9 +152,9 @@ export const deleteEvent: RequestHandler = async (req, res) => {
 export const updateWods: RequestHandler = async (req, res) => {
   // if (debug) console.log('#namehere')
   try {
-    const { wods, toDelete } = <{ wods: WodType[]; toDelete: string[] }>(
-      req.body
-    );
+    const { wods, toDelete, categories } = <
+      { wods: WodType[]; toDelete: string[]; categories: any }
+    >req.body;
     const updWod = async (wod: WodType) => {
       const query = wod._id
         ? { _id: wod._id }
@@ -185,7 +176,7 @@ export const updateWods: RequestHandler = async (req, res) => {
       delWods(),
     ]);
     const findWods = await Wod.find({
-      category_id: { $in: wods[0].category_id },
+      category_id: { $in: categories },
     });
     res.send(findWods);
   } catch (error: any) {
@@ -197,11 +188,12 @@ export const updateWods: RequestHandler = async (req, res) => {
 type reqBodyUpdateResult = {
   wod_id: string;
   results: ResultType[];
+  categories: string[];
 };
 export const updateResults: RequestHandler = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
-    const { wod_id, results } = <reqBodyUpdateResult>req.body;
+    const { wod_id, results, categories } = <reqBodyUpdateResult>req.body;
 
     const notExist = results.some((team_res) => !team_res.team_id);
     if (notExist)
@@ -214,8 +206,8 @@ export const updateResults: RequestHandler = async (req, res) => {
       },
       { new: true }
     );
-    const wods = await Wod.find({ category_id: w?.category_id });
-    console.log(wods);
+    const wods = await Wod.find({ category_id: { $in: categories } });
+    // console.log(wods);
     res.send(wods);
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
@@ -247,6 +239,46 @@ export const updateTeams: RequestHandler = async (req, res) => {
   }
 };
 
+export const toggleUpdating: RequestHandler = async (req, res) => {
+  if (debug) console.log("#toggleUpdating");
+  try {
+    const { category_id, state } = req.body;
+    const evn = await Event.findOneAndUpdate(
+      { "categories._id": category_id },
+      {
+        "categories.$.updating": state,
+      },
+      { new: true }
+    );
+    // console.log(evn);
+    if (evn) {
+      res.send("ok");
+    } else {
+      res.status(400).json({ msg: "Evento no encontrado" });
+    }
+  } catch (error: any) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+
+// export const migration: RequestHandler = async (req, res) => {
+//   if (debug) console.log("#migration");
+//   try {
+//     const user = await User.find();
+//     res.send(user);
+//   } catch (error: any) {
+//     res.status(400).json({ msg: error.message });
+//   }
+// };
+
+// export const namehere:RequestHandler = async (req,res)=>{
+//     if(debug) console.log('#namehere')
+//     try {
+//         res.send('ok')
+//     } catch (error:any) {
+//         res.status(400).json({ msg: error.message })
+//     }
+//
 // export const namehere:RequestHandler = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {

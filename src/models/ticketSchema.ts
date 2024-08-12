@@ -6,12 +6,16 @@ const TicketSchema = new Schema({
     category: { type: String, required: true },
     category_id: { type: String, required: true },
     users: { type:[objId], ref: "User", required: true },
-    secure_url: { type: String, required: true },
-    public_id: { type: String, required: true },
-    transf: { type:String, required: true },
     phone: { type:String, required: true },
     name: { type:String, required: true },
-    
+    dues: { type:[{
+        secure_url: { type: String, required: true },
+        public_id: { type: String, required: true },
+        transf: { type:String, required: true },
+        payDues: { type:Number, required: true },
+    }], required: true },
+    duesLimit: { type:Number, required: true },
+
 },
     {
         timestamps: true,

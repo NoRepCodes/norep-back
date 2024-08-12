@@ -19,16 +19,16 @@ import Ticket from "../models/ticketSchema";
 //@ts-ignore
 import nodemailer from "nodemailer";
 
-const debug = false;
+const debug = true;
 
 export const login: RequestHandler = async (req, res) => {
   if (debug) console.log("#login");
   try {
     const { email, pass } = req.body;
 
-    if(email[0] ==="@"){
+    if (email[0] === "@") {
       // const { username, password } = req.body;
-      const adm: any = await Admin.findOne({ username:email });
+      const adm: any = await Admin.findOne({ username: email });
       if (adm) {
         bcrypt.compare(pass, adm.password).then(function (result) {
           if (result) {
@@ -41,7 +41,7 @@ export const login: RequestHandler = async (req, res) => {
           }
         });
       }
-    }else{
+    } else {
       const user = await User.findOne({ email });
       if (!user) return res.status(401).json({ msg: "Correo incorrecto" });
       bcrypt.compare(pass, user.password, function (_: any, result: any) {
@@ -63,7 +63,7 @@ type reqBodyUser = UserType & {
   pass: string;
 };
 export const registerUser: RequestHandler = async (req, res) => {
-  // if(debug) console.log('#namehere')
+  if(debug) console.log('#register')
   try {
     const {
       name,
@@ -77,7 +77,7 @@ export const registerUser: RequestHandler = async (req, res) => {
       shirt,
       phone,
     } = <reqBodyUser>req.body;
-
+    console.log('something is wird');
     const ifEmail = await User.find({ email: email });
     if (ifEmail.length > 0)
       return res.status(403).json({ msg: "Correo en uso" });
@@ -214,7 +214,6 @@ export const deleteAdmin: RequestHandler = async (req, res) => {
 export const loginAdmin: RequestHandler = async (req, res) => {
   if (debug) console.log("#loginAdmin");
   try {
-   
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
@@ -275,30 +274,41 @@ export const registerTicket: RequestHandler = async (req, res) => {
       secure_url: image,
       public_id: "_",
     });
-    await Event.findOneAndUpdate(
+    const ev = await Event.findOneAndUpdate(
       {
         "categories._id": category_id,
       },
-      { $inc: { "categories.$.slots": 1 } }
+      { $inc: { "categories.$.slots": 1 } },
+      { new: true }
     );
-    await Ticket.create({
-      event: result.name,
-      category: result.categories[cindex].name,
-      category_id: result.categories[cindex]._id,
-      secure_url,
-      public_id,
-      users,
-      captain: users[0],
-      phone,
-      name: inputs.name,
-      transf: inputs.transf,
-    });
+    if (ev) {
+      await Ticket.create({
+        event: result.name,
+        category: result.categories[cindex].name,
+        category_id: result.categories[cindex]._id,
+        users,
+        captain: users[0],
+        phone,
+        name: inputs.name,
+        dues: [
+          {
+            // secure_url: "asd",
+            // public_id: "asd",
+            secure_url,
+            public_id,
+            transf: inputs.transf,
+            payDues: inputs.payDues,
+          },
+        ],
+        duesLimit: ev.dues,
+      });
 
-    // this is to save
-    // result.categories[cindex].teams.push(users);
-    // await result.save();
+      // this is to save
+      // result.categories[cindex].teams.push(users);
+      // await result.save();
 
-    return res.send({ msg: "Solicitud enviada con exito!" });
+      return res.send({ msg: "Solicitud enviada con exito!" });
+    } else res.status(404).json({ msg: "Evento no encontrado" });
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
@@ -442,6 +452,31 @@ export const getTickets: RequestHandler = async (req, res) => {
   }
 };
 
+export const pushTicket: RequestHandler = async (req, res) => {
+  if (debug) console.log("#pushTicket");
+  try {
+    const {captain_id,transf,payDues,img} = req.body
+    const ticket = await Ticket.findOne({users:captain_id});
+    if(ticket){
+      const {secure_url,public_id} = await uploadImage({secure_url:img,public_id:'_'})
+      console.log(secure_url,public_id);
+      ticket.dues.push({
+        secure_url,
+        public_id,
+        transf,
+        payDues,
+      })
+      await ticket.save()
+      res.send("ok");
+    }else{
+      res.status(404).json({ msg: 'No se ha encontrado un pago anterior.'});
+    }
+    // res.send("ok");
+  } catch (error: any) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+
 // var transporter = nodemailer.createTransport({
 //   service: "yahoo",
 //   auth: {
@@ -450,7 +485,6 @@ export const getTickets: RequestHandler = async (req, res) => {
 //   },
 // });
 
-
 // transporter.sendMail(mailOptions, function(error, info){
 //   if (error) {
 //     console.log(error);
@@ -458,6 +492,7 @@ export const getTickets: RequestHandler = async (req, res) => {
 //     console.log('Email sent: ' + info.response);
 //   }
 // });
+
 export const approveTicket: RequestHandler = async (req, res) => {
   if (debug) console.log("#approveTicket");
   try {
@@ -482,7 +517,7 @@ export const approveTicket: RequestHandler = async (req, res) => {
       }
     );
     if (event) {
-      await deleteImage(ticket.public_id);
+      // await deleteImage(ticket.public_id);
       await Ticket.findOneAndDelete({ _id: ticket._id });
       const results = await Ticket.find();
       res.send(results);
@@ -497,7 +532,7 @@ export const rejectTicket: RequestHandler = async (req, res) => {
     const { ticket } = req.body;
     const result = await Ticket.findOneAndDelete({ _id: ticket._id });
     if (result) {
-      await deleteImage(ticket.public_id);
+      // await deleteImage(ticket.public_id);
       const results = await Ticket.find();
       res.send(results);
     } else res.status(404).json({ msg: "Ticket no encontrado." });

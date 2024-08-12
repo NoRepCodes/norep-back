@@ -55,6 +55,7 @@ export type EventType = {
     _id: string | Types.ObjectId,
     name: string,
     since: string,
+    dues: number,
     until: string,
     place: string,
     secure_url: string,
