@@ -14,6 +14,7 @@ import Event from "../models/eventSchema";
 import Wods from "../models/wodSchema";
 import { Document } from "mongoose";
 import Admin from "../models/adminSchema";
+//@ts-ignore
 import bcrypt from "bcrypt";
 import Ticket from "../models/ticketSchema";
 //@ts-ignore
@@ -30,7 +31,7 @@ export const login: RequestHandler = async (req, res) => {
       // const { username, password } = req.body;
       const adm: any = await Admin.findOne({ username: email });
       if (adm) {
-        bcrypt.compare(pass, adm.password).then(function (result) {
+        bcrypt.compare(pass, adm.password).then(function (result:any) {
           if (result) {
             res.send({
               username: adm.username,
@@ -182,7 +183,7 @@ export const createAdmin: RequestHandler = async (req, res) => {
   if (debug) console.log("#createAdmin");
   try {
     const { username, pass } = req.body;
-    bcrypt.hash(pass, 7, async (err, hash) => {
+    bcrypt.hash(pass, 7, async (err:any, hash:any) => {
       // Store hash in your password DB.
       const result = await Admin.create({ username, password: hash });
       res.send(result);
