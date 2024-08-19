@@ -58,12 +58,8 @@ export const login: RequestHandler = async (req, res) => {
   }
 };
 
-type reqBodyUser = UserType & {
-  birth: string;
-  pass: string;
-};
 export const registerUser: RequestHandler = async (req, res) => {
-  if(debug) console.log('#register')
+  if (debug) console.log("#register");
   try {
     const {
       name,
@@ -76,8 +72,8 @@ export const registerUser: RequestHandler = async (req, res) => {
       location,
       shirt,
       phone,
-    } = <reqBodyUser>req.body;
-    console.log('something is wird');
+    } = req.body;
+    console.log("something is wird");
     const ifEmail = await User.find({ email: email });
     if (ifEmail.length > 0)
       return res.status(403).json({ msg: "Correo en uso" });
@@ -108,17 +104,13 @@ export const registerUser: RequestHandler = async (req, res) => {
   }
 };
 
-export type reqBodyRegisterTeam = {
-  category_id: string;
-  team: TeamType;
-};
 export const registerTeam: RequestHandler = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
     // TO DO:
     // age and gender is validated in front -- CHECK THAT EVENT IS NOT 30 MINS OLDER IN FRONT BEFORE UPDATE
     // PLUS: USE GET TO VERIFY USERS CARDS_ID & GET _ID'S
-    const { team, category_id } = <reqBodyRegisterTeam>req.body;
+    const { team, category_id } = req.body;
 
     const result: (EventType & Document) | null = await Event.findOne({
       "categories._id": category_id,
@@ -211,14 +203,6 @@ export const deleteAdmin: RequestHandler = async (req, res) => {
   }
 };
 
-export const loginAdmin: RequestHandler = async (req, res) => {
-  if (debug) console.log("#loginAdmin");
-  try {
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
-
 export const registerTicket: RequestHandler = async (req, res) => {
   if (debug) console.log("#registerTicket");
   try {
@@ -231,7 +215,7 @@ export const registerTicket: RequestHandler = async (req, res) => {
     if (result === null)
       return res.status(404).json({ msg: "Categoría no encontrada" });
     cindex = result.categories.findIndex(
-      (c) => c._id.toString() === category_id
+      (c: any) => c._id.toString() === category_id
     );
 
     if (
@@ -313,17 +297,11 @@ export const registerTicket: RequestHandler = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
-type CheckType = {
-  captain: UserType;
-  card_2: string;
-  card_3: string;
-  card_4: string;
-  category: CategoryType;
-};
+
 export const checkUsers: RequestHandler = async (req, res) => {
   if (debug) console.log("#checkUser");
   try {
-    const { captain, card_2, card_3, card_4, category } = <CheckType>req.body;
+    const { captain, card_2, card_3, card_4, category } = req.body;
     let auxFem = 0;
     let auxMal = 0;
     let am = category.filter?.age_min;
@@ -455,21 +433,24 @@ export const getTickets: RequestHandler = async (req, res) => {
 export const pushTicket: RequestHandler = async (req, res) => {
   if (debug) console.log("#pushTicket");
   try {
-    const {captain_id,transf,payDues,img} = req.body
-    const ticket = await Ticket.findOne({users:captain_id});
-    if(ticket){
-      const {secure_url,public_id} = await uploadImage({secure_url:img,public_id:'_'})
-      console.log(secure_url,public_id);
+    const { captain_id, transf, payDues, img } = req.body;
+    const ticket = await Ticket.findOne({ users: captain_id });
+    if (ticket) {
+      const { secure_url, public_id } = await uploadImage({
+        secure_url: img,
+        public_id: "_",
+      });
+      // console.log(secure_url, public_id);
       ticket.dues.push({
         secure_url,
         public_id,
         transf,
         payDues,
-      })
-      await ticket.save()
+      });
+      await ticket.save();
       res.send("ok");
-    }else{
-      res.status(404).json({ msg: 'No se ha encontrado un pago anterior.'});
+    } else {
+      res.status(404).json({ msg: "No se ha encontrado un pago anterior." });
     }
     // res.send("ok");
   } catch (error: any) {
@@ -484,6 +465,13 @@ export const pushTicket: RequestHandler = async (req, res) => {
 //     pass: "Crossfit2024",
 //   },
 // });
+
+// var mailOptions = {
+//   from: 'youremail@gmail.com',
+//   to: 'myfriend@yahoo.com',
+//   subject: 'Sending Email using Node.js',
+//   text: 'That was easy!'
+// };
 
 // transporter.sendMail(mailOptions, function(error, info){
 //   if (error) {
@@ -520,6 +508,38 @@ export const approveTicket: RequestHandler = async (req, res) => {
       // await deleteImage(ticket.public_id);
       await Ticket.findOneAndDelete({ _id: ticket._id });
       const results = await Ticket.find();
+      
+      let transporter = nodemailer.createTransport({
+        service: "yahoo",
+        auth: {
+          user: "norep.code@yahoo.com",
+          pass: "lgippxsozkcbrovy",
+        },
+      });
+  
+      
+      // const ticket = { users: "66b68416b5a9026a6d13cb4d" };
+      // const users = await User.find({_id: { '$in': ticket.users }})
+      const users = await User.find({ _id: { $in: ticket.users } }, { email: 1 });
+  
+      users.forEach((user) => {
+        let mailOptions = {
+          from: "norep.code@yahoo.com",
+          to: user.email,
+          subject: "Sending Email using Node.js",
+          html: emailMsg(ticket.name,ticket.event,ticket.category,event._id.toString()),
+          
+        };
+        transporter.sendMail(mailOptions, (error: any, info: any) => {
+          if (error) {
+            // res.send(error);
+            console.log(error);
+          } else {
+            console.log("Email sent: " + info.response);
+          }
+        });
+      });
+      
       res.send(results);
     } else res.status(404).json({ msg: "Evento no encontrado." });
   } catch (error: any) {
@@ -541,6 +561,54 @@ export const rejectTicket: RequestHandler = async (req, res) => {
   }
 };
 
+export const sendEmail: RequestHandler = async (req, res) => {
+  if (debug) console.log("#sendEmail");
+  try {
+    let transporter = nodemailer.createTransport({
+      //lgippxsozkcbrovy
+      service: "yahoo",
+      auth: {
+        user: "norep.code@yahoo.com",
+        pass: "lgippxsozkcbrovy",
+      },
+    });
+
+    
+    const ticket = { users: "66b68416b5a9026a6d13cb4d" };
+    // const users = await User.find({_id: { '$in': ticket.users }})
+    const users = await User.find({ _id: { $in: ticket.users } }, { email: 1 });
+
+    users.forEach((user) => {
+      let mailOptions = {
+        from: "norep.code@yahoo.com",
+        to: user.email,
+        subject: "Sending Email using Node.js",
+        html: emailMsg('team','event','category','_id'),
+        
+      };
+      transporter.sendMail(mailOptions, (error: any, info: any) => {
+        if (error) {
+          // res.send(error);
+          console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+    });
+    // console.log(users);
+
+    res.send(users);
+    // await transporter.sendMail(mailOptions, (error:any, info:any)=> {
+    //   if (error) {
+    //     res.send(error);
+    //   } else {
+    //     res.send("Email sent: " + info.response)
+    //   }
+    // });
+  } catch (error: any) {
+    res.status(400).json({ msg: error.message });
+  }
+};
 // export const namehere:RequestHandler = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {
@@ -550,3 +618,18 @@ export const rejectTicket: RequestHandler = async (req, res) => {
 //     }
 //
 // }
+
+
+const emailMsg = (team:string,event:string,category:string,event_id:string)=>{
+  return `<body>
+    <div style="width:500px;padding:2em;box-sizing:border-box">
+      <h1 style="font-family: sans-serif; font-weight: 600;font-style: normal;color: black;" >${team.toUpperCase()}</h1>
+      <p style="font-family: sans-serif; color: black;margin: 0;" >Ha sido aprobado para participar en el evento :</p>
+      <h1 style="text-decoration: underline #F1FF48 10px;font-family:  sans-serif;font-weight: 600;font-style: normal;color: black;" >${event.toUpperCase()}</h1>
+      <h2 style="font-size: 1.5em;text-decoration: underline #F1FF48 10px;font-family:  sans-serif;font-weight: 600;font-style: normal;color: black;" >${category.toUpperCase()}</h2>
+      <div style="height: 32px;" ></div>
+      <a style="color: black;font-style: normal;font-weight: 600;font-family:  sans-serif;background-color: #F1FF48;border: 1px solid #191919;font-size: 1.3em;padding: .5em 1em;color: #191919;cursor: pointer;text-decoration: none;" href="/" >IR AL EVENTO</a>
+    </div>
+  </body>
+  `
+}

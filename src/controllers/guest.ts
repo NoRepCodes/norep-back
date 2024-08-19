@@ -12,7 +12,7 @@ export const test: RequestHandler = async (req, res) => {
     if (debug) console.log('#test')
 
     // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
-    res.send('version 2.0.0')
+    res.send('version 2.0.5')
     // res.send('NOREP ONLINE')
     // res.send(process.env.MONGODB_URI_TEST)
 }

@@ -29,7 +29,7 @@ export const createEvent: RequestHandler = async (req, res) => {
       partners: pimages,
       register_time,
       manual_teams,
-    } = <EventType>req.body;
+    } = req.body;
     const { secure_url, public_id } = await uploadImage({
       secure_url: s_url,
       public_id: "_",
@@ -78,13 +78,13 @@ export const updateEvent: RequestHandler = async (req, res) => {
       partners: pimages,
       manual_teams,
       register_time,
-    } = <EventType>req.body;
+    } = req.body;
 
     const evnt = await Event.findById(_id);
     if (evnt === null || evnt === undefined)
       return res.status(400).json({ msg: "Evento no encontrado" });
     let bool = false;
-    categories.forEach((c, index) => {
+    categories.forEach((c:any) => {
       c._id = new Types.ObjectId(c._id);
       //@ts-ignore
       // const i = evnt.categories.findIndex(categ => categ._id.toString() === c._id)
@@ -135,7 +135,7 @@ export const updateEvent: RequestHandler = async (req, res) => {
 export const deleteEvent: RequestHandler = async (req, res) => {
   // if (debug) console.log('#deleteEvent')
   try {
-    const { _id, public_id, partners } = <EventType>req.body;
+    const { _id, public_id, partners } = req.body;
     const result = await Event.deleteOne({ _id: _id });
     if (result.deletedCount > 0) {
       await deleteImage(public_id);
@@ -152,9 +152,7 @@ export const deleteEvent: RequestHandler = async (req, res) => {
 export const updateWods: RequestHandler = async (req, res) => {
   // if (debug) console.log('#namehere')
   try {
-    const { wods, toDelete, categories } = <
-      { wods: WodType[]; toDelete: string[]; categories: any }
-    >req.body;
+    const { wods, toDelete, categories } = req.body;
     const updWod = async (wod: WodType) => {
       const query = wod._id
         ? { _id: wod._id }
@@ -172,7 +170,7 @@ export const updateWods: RequestHandler = async (req, res) => {
       }
     };
     const result = await Promise.all([
-      ...wods.map((w) => updWod(w)),
+      ...wods.map((w:any) => updWod(w)),
       delWods(),
     ]);
     const findWods = await Wod.find({
@@ -185,17 +183,13 @@ export const updateWods: RequestHandler = async (req, res) => {
   }
 };
 
-type reqBodyUpdateResult = {
-  wod_id: string;
-  results: ResultType[];
-  categories: string[];
-};
+
 export const updateResults: RequestHandler = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
-    const { wod_id, results, categories } = <reqBodyUpdateResult>req.body;
+    const { wod_id, results, categories } = req.body;
 
-    const notExist = results.some((team_res) => !team_res.team_id);
+    const notExist = results.some((team_res:any) => !team_res.team_id);
     if (notExist)
       return res.status(404).json({ msg: "Uno de los equipos no existe" });
 
@@ -225,7 +219,6 @@ export const updateTeams: RequestHandler = async (req, res) => {
       if (team._id === "_") team._id = undefined;
       if (team.captain === "_") team.captain = undefined;
     });
-    console.log(aux);
     await Event.findOneAndUpdate(
       { "categories._id": category_id },
       {

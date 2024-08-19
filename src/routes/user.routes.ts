@@ -17,8 +17,9 @@ router.post('/pushTicket', usr.pushTicket)
 
 router.post('/createAdmin', usr.createAdmin)
 router.post('/deleteAdmin', usr.deleteAdmin)
-router.post('/loginAdmin', usr.loginAdmin)
 
 router.get('/getUserRedcords', usr.getUserRedcords)
+
+router.get('/sendEmail', usr.sendEmail)
 
 export default router
