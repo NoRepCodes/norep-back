@@ -473,38 +473,11 @@ const pushTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.pushTicket = pushTicket;
-// var transporter = nodemailer.createTransport({
-//   service: "yahoo",
-//   auth: {
-//     user: "norep.code@yahoo.com",
-//     pass: "Crossfit2024",
-//   },
-// });
-// var mailOptions = {
-//   from: 'youremail@gmail.com',
-//   to: 'myfriend@yahoo.com',
-//   subject: 'Sending Email using Node.js',
-//   text: 'That was easy!'
-// };
-// transporter.sendMail(mailOptions, function(error, info){
-//   if (error) {
-//     console.log(error);
-//   } else {
-//     console.log('Email sent: ' + info.response);
-//   }
-// });
 const approveTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#approveTicket");
     try {
-        // let mailOptions = {
-        //   from: "youremail@gmail.com",
-        //   to: "myfriend@yahoo.com",
-        //   subject: "Sending Email using Node.js",
-        //   text: "That was easy!",
-        // };
         const { ticket } = req.body;
-        // console.log(ticket);
         const event = yield eventSchema_1.default.findOneAndUpdate({ "categories._id": ticket.category_id }, {
             $push: {
                 "categories.$.teams": {
@@ -525,19 +498,16 @@ const approveTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     pass: "lgippxsozkcbrovy",
                 },
             });
-            // const ticket = { users: "66b68416b5a9026a6d13cb4d" };
-            // const users = await User.find({_id: { '$in': ticket.users }})
             const users = yield userSchema_1.default.find({ _id: { $in: ticket.users } }, { email: 1 });
             users.forEach((user) => {
                 let mailOptions = {
                     from: "norep.code@yahoo.com",
                     to: user.email,
-                    subject: "Sending Email using Node.js",
+                    subject: `Haz sido admitido en el evento ${ticket.event.toUpperCase()}!`,
                     html: emailMsg(ticket.name, ticket.event, ticket.category, event._id.toString()),
                 };
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
-                        // res.send(error);
                         console.log(error);
                     }
                     else {
@@ -587,18 +557,16 @@ const sendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             },
         });
         const ticket = { users: "66b68416b5a9026a6d13cb4d" };
-        // const users = await User.find({_id: { '$in': ticket.users }})
         const users = yield userSchema_1.default.find({ _id: { $in: ticket.users } }, { email: 1 });
         users.forEach((user) => {
             let mailOptions = {
                 from: "norep.code@yahoo.com",
                 to: user.email,
-                subject: "Sending Email using Node.js",
-                html: emailMsg('team', 'event', 'category', '_id'),
+                subject: `Haz sido admitido en el evento STRONG ENDURANCE!`,
+                html: emailMsg('los odiosos', 'strong endurance', 'avanzado', '66b4e80393c333245f375286'),
             };
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    // res.send(error);
                     console.log(error);
                 }
                 else {
@@ -606,15 +574,7 @@ const sendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 }
             });
         });
-        // console.log(users);
         res.send(users);
-        // await transporter.sendMail(mailOptions, (error:any, info:any)=> {
-        //   if (error) {
-        //     res.send(error);
-        //   } else {
-        //     res.send("Email sent: " + info.response)
-        //   }
-        // });
     }
     catch (error) {
         res.status(400).json({ msg: error.message });
@@ -638,9 +598,15 @@ const emailMsg = (team, event, category, event_id) => {
       <h1 style="text-decoration: underline #F1FF48 10px;font-family:  sans-serif;font-weight: 600;font-style: normal;color: black;" >${event.toUpperCase()}</h1>
       <h2 style="font-size: 1.5em;text-decoration: underline #F1FF48 10px;font-family:  sans-serif;font-weight: 600;font-style: normal;color: black;" >${category.toUpperCase()}</h2>
       <div style="height: 32px;" ></div>
-      <a style="color: black;font-style: normal;font-weight: 600;font-family:  sans-serif;background-color: #F1FF48;border: 1px solid #191919;font-size: 1.3em;padding: .5em 1em;color: #191919;cursor: pointer;text-decoration: none;" href="/" >IR AL EVENTO</a>
+      <a href="https://www.norep.com.ve/resultados/${event_id}" target="_blank" style="color: black;font-style: normal;font-weight: 600;font-family:  sans-serif;background-color: #F1FF48;border: 1px solid #191919;font-size: 1.3em;padding: .5em 1em;color: #191919;cursor: pointer;text-decoration: none;" href="/" >IR AL EVENTO</a>
     </div>
   </body>
   `;
 };
+/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
+ 
+Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
+  
+En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
+*/ 
 //# sourceMappingURL=user.js.map
