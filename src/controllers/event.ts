@@ -169,6 +169,7 @@ export const updateWods: RequestHandler = async (req, res) => {
         return await Wod.deleteMany({ _id: { $in: toDelete } });
       }
     };
+    /// CHECK THAT WODS UPLOAD IN ORDER
     const result = await Promise.all([
       ...wods.map((w:any) => updWod(w)),
       delWods(),
@@ -258,7 +259,7 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
 //   if (debug) console.log("#migration");
 //   try {
 //     const user = await User.find();
-//     res.send(user);
+//     res.send(user)
 //   } catch (error: any) {
 //     res.status(400).json({ msg: error.message });
 //   }

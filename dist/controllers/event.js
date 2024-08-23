@@ -159,6 +159,7 @@ const updateWods = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 return yield wodSchema_1.default.deleteMany({ _id: { $in: toDelete } });
             }
         });
+        /// CHECK THAT WODS UPLOAD IN ORDER
         const result = yield Promise.all([
             ...wods.map((w) => updWod(w)),
             delWods(),
@@ -243,7 +244,7 @@ exports.toggleUpdating = toggleUpdating;
 //   if (debug) console.log("#migration");
 //   try {
 //     const user = await User.find();
-//     res.send(user);
+//     res.send(user)
 //   } catch (error: any) {
 //     res.status(400).json({ msg: error.message });
 //   }
