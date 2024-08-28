@@ -26,7 +26,8 @@ export const login: RequestHandler = async (req, res) => {
   if (debug) console.log("#login");
   try {
     const { email, pass } = req.body;
-
+    // let a = 's'
+    // a.toLowerCase()
     if (email[0] === "@") {
       // const { username, password } = req.body;
       const adm: any = await Admin.findOne({ username: email });
@@ -43,7 +44,7 @@ export const login: RequestHandler = async (req, res) => {
         });
       }
     } else {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email:email.toLowerCase() });
       if (!user) return res.status(401).json({ msg: "Correo incorrecto" });
       bcrypt.compare(pass, user.password, function (_: any, result: any) {
         if (!result)
@@ -86,7 +87,7 @@ export const registerUser: RequestHandler = async (req, res) => {
       const result = await User.create({
         password,
         name,
-        email,
+        email:email.toLowerCase(),
         shirt,
         card_id,
         genre,

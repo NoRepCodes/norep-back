@@ -40,6 +40,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log("#login");
     try {
         const { email, pass } = req.body;
+        // let a = 's'
+        // a.toLowerCase()
         if (email[0] === "@") {
             // const { username, password } = req.body;
             const adm = yield adminSchema_1.default.findOne({ username: email });
@@ -58,7 +60,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
         else {
-            const user = yield userSchema_1.default.findOne({ email });
+            const user = yield userSchema_1.default.findOne({ email: email.toLowerCase() });
             if (!user)
                 return res.status(401).json({ msg: "Correo incorrecto" });
             bcrypt_1.default.compare(pass, user.password, function (_, result) {
@@ -93,7 +95,7 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             const result = yield userSchema_1.default.create({
                 password,
                 name,
-                email,
+                email: email.toLowerCase(),
                 shirt,
                 card_id,
                 genre,
