@@ -16,16 +16,10 @@ exports.deleteImages = exports.deleteImage = exports.uploadImages = exports.uplo
 const cloudinary_1 = require("cloudinary");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-// cloudinary.config({
-//   cloud_name: process.env.CLOUD_NAME,
-//   api_key: process.env.API_KEY,
-//   api_secret: process.env.API_SECRET,
-//   secure: true,
-// });
 cloudinary_1.v2.config({
-    cloud_name: 'dtdgl3ajp',
-    api_key: '331735467981966',
-    api_secret: '4iq8RwNvVUkxRGJzVe7YAqiZvjA',
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET,
     secure: true,
 });
 const regx = /data:image/;

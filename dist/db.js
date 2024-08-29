@@ -20,7 +20,7 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         (0, mongoose_1.set)("strictQuery", false);
         // await connect("mongodb+srv://norepcode:Crossfit2023@norep.rkqhfdi.mongodb.net/norep")
-        yield (0, mongoose_1.connect)((_a = process.env.MONGODB_URI_TEST) !== null && _a !== void 0 ? _a : '')
+        yield (0, mongoose_1.connect)((_a = process.env.MONGODB_URI) !== null && _a !== void 0 ? _a : '')
             .then(db => console.log('Database is connected'))
             .catch(err => console.log(err));
     }

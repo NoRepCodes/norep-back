@@ -5,7 +5,7 @@ const connectDB = async () => {
   try {
     set("strictQuery", false);
     // await connect("mongodb+srv://norepcode:Crossfit2023@norep.rkqhfdi.mongodb.net/norep")
-    await connect(process.env.MONGODB_URI_TEST ?? '')
+    await connect(process.env.MONGODB_URI ?? '')
       .then(db => console.log('Database is connected'))
       .catch(err => console.log(err))
 
