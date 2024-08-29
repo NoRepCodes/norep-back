@@ -16,10 +16,11 @@ const mongoose_1 = require("mongoose");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         (0, mongoose_1.set)("strictQuery", false);
-        yield (0, mongoose_1.connect)("mongodb+srv://norepcode:Crossfit2023@norep.rkqhfdi.mongodb.net/norep")
-            // await connect("mongodb+srv://norepcode:Crossfit2023@norep.rkqhfdi.mongodb.net/tests" ?? '')
+        // await connect("mongodb+srv://norepcode:Crossfit2023@norep.rkqhfdi.mongodb.net/norep")
+        yield (0, mongoose_1.connect)((_a = process.env.MONGODB_URI_TEST) !== null && _a !== void 0 ? _a : '')
             .then(db => console.log('Database is connected'))
             .catch(err => console.log(err));
     }
