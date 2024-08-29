@@ -8,6 +8,11 @@ dotenv.config()
 const debug = false
 
 
+export const uri: RequestHandler = async (req, res) => {
+    if (debug) console.log('#test')
+
+    res.send(process.env.MONGODB_URI)
+}
 export const test: RequestHandler = async (req, res) => {
     if (debug) console.log('#test')
 
