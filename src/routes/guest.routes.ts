@@ -3,7 +3,7 @@ const router = Router()
 
 import *as guest from '../controllers/guest'
 
-router.get('/uri', guest.uri)
+// router.get('/uri', guest.uri)
 router.get('/', guest.test)
 router.get('/getEvents', guest.getEvents)
 router.get('/getEventPlusWods', guest.getEventPlusWods)
