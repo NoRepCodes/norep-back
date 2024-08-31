@@ -578,6 +578,7 @@ export const sendEmail: RequestHandler = async (req, res) => {
 // }
 
 
+
 const emailMsg = (team:string,event:string,category:string,event_id:string)=>{
   return `<body>
     <div style="width:500px;padding:2em;box-sizing:border-box">
