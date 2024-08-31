@@ -198,7 +198,7 @@ export const updateResults: RequestHandler = async (req, res) => {
     if (notExist)
       return res.status(404).json({ msg: "Uno de los equipos no existe" });
 
-    const w = await Wod.findOneAndUpdate(
+    await Wod.findOneAndUpdate(
       { _id: wod_id },
       {
         $set: { results },
@@ -259,15 +259,6 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
   }
 };
 
-// export const migration: RequestHandler = async (req, res) => {
-//   if (debug) console.log("#migration");
-//   try {
-//     const user = await User.find();
-//     res.send(user)
-//   } catch (error: any) {
-//     res.status(400).json({ msg: error.message });
-//   }
-// };
 
 // export const namehere:RequestHandler = async (req,res)=>{
 //     if(debug) console.log('#namehere')

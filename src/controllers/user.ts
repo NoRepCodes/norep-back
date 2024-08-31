@@ -95,7 +95,7 @@ export const registerUser: RequestHandler = async (req, res) => {
         box,
         birth,
         phone,
-        // birth: moment(new Date(birth)).unix(),
+        // birth:moment(new Date(birth)).unix(),
       });
       const { password: _, ...allData } = result;
       //@ts-ignore
@@ -576,6 +576,7 @@ export const sendEmail: RequestHandler = async (req, res) => {
 //     }
 //
 // }
+
 
 
 const emailMsg = (team:string,event:string,category:string,event_id:string)=>{
