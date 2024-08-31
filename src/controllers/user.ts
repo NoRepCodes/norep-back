@@ -95,7 +95,7 @@ export const registerUser: RequestHandler = async (req, res) => {
         box,
         birth,
         phone,
-        // birth: moment(new Date(birth)).unix(),
+        // birth:moment(new Date(birth)).unix(),
       });
       const { password: _, ...allData } = result;
       //@ts-ignore
