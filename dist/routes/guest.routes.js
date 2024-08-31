@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const router = (0, express_1.Router)();
 const guest = __importStar(require("../controllers/guest"));
-router.get('/uri', guest.uri);
+// router.get('/uri', guest.uri)
 router.get('/', guest.test);
 router.get('/getEvents', guest.getEvents);
 router.get('/getEventPlusWods', guest.getEventPlusWods);
