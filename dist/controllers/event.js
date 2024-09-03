@@ -151,8 +151,11 @@ const updateWods = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             const query = wod._id
                 ? { _id: wod._id }
                 : { category_id: wod.category_id, _id: new mongoose_1.Types.ObjectId() };
-            const { _id } = wod, data = __rest(wod, ["_id"]);
-            return yield wodSchema_1.default.findOneAndUpdate(query, Object.assign(Object.assign({}, data), { $set: { results: [] } }), { new: true, upsert: true }).lean();
+            const { _id, results } = wod, data = __rest(wod, ["_id", "results"]);
+            console.log(data);
+            return yield wodSchema_1.default.findOneAndUpdate(query, Object.assign({}, data), 
+            // { ...data, $set: { results: [] } },
+            { new: true, upsert: true }).lean();
         });
         const delWods = () => __awaiter(void 0, void 0, void 0, function* () {
             if (toDelete.length > 0) {
