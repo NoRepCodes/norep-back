@@ -12,26 +12,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventPlusWods = exports.getEventsPlusTeams = exports.getEvents = exports.test = exports.uri = void 0;
+exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventPlusWods = exports.getEventsPlusTeams = exports.getEvents = exports.test = void 0;
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
 const t_1 = __importDefault(require("../models/t"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const wodSchema_1 = __importDefault(require("../models/wodSchema"));
 dotenv_1.default.config();
 const debug = false;
-const uri = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log('#test');
-    res.send(process.env.MONGODB_URI);
-});
-exports.uri = uri;
+// export const uri: RequestHandler = async (req, res) => {
+//     if (debug) console.log('#test')
+//     res.send(process.env.MONGODB_URI)
+// }
 const test = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log('#test');
     // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
-    // res.send('version 2.1.3')
+    res.send('version 2.1.7');
     // res.send('NOREP ONLINE')
-    res.send(process.env.MONGODB_URI);
+    // res.send(process.env.MONGODB_URI)
 });
 exports.test = test;
 const getEvents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
