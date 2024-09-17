@@ -16,8 +16,8 @@ export type WodType = {
     name: string,
     time_cap?: number,
     amount_cap?: number,
-    amount_type: "Lbs" | "Puntos" | "Reps",
-    wod_type: "AMRAP" | 'FORTIME' | "RM" | "CIRCUITO",
+    amount_type: "Lbs" | "Puntos" | "Reps"|"Mts",
+    wod_type: "AMRAP" | 'FORTIME' | "RM" | "CIRCUITO"|"Nado",
     results: ResultType[],
     category_id: string
     description: string

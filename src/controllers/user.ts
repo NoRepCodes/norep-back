@@ -301,7 +301,7 @@ export const registerTicket: RequestHandler = async (req, res) => {
 };
 
 export const checkUsers: RequestHandler = async (req, res) => {
-  if (debug) console.log("#checkUser");
+  if (debug) console.log("#checkUsers");
   try {
     const { captain, card_2, card_3, card_4, category } = req.body;
     let auxFem = 0;
@@ -319,7 +319,7 @@ export const checkUsers: RequestHandler = async (req, res) => {
       : undefined;
 
     let users_id = [captain._id];
-
+    console.log(auxFem);
     if (captain) {
       if (category.filter?.male || category.filter?.female) {
         if (captain.genre === "Masculino") auxMal += 1;
@@ -335,7 +335,6 @@ export const checkUsers: RequestHandler = async (req, res) => {
         });
       }
     }
-
     if (card_2) {
       const fu2 = await User.findOne({ card_id: card_2 });
       if (fu2) {
@@ -360,7 +359,7 @@ export const checkUsers: RequestHandler = async (req, res) => {
       }
     }
     if (card_3) {
-      const fu3 = await User.findOne({ card_id: card_2 });
+      const fu3 = await User.findOne({ card_id: card_3 });
       if (fu3) {
         users_id.push(fu3._id.toString());
         if (category.filter?.male || category.filter?.female) {
@@ -383,7 +382,7 @@ export const checkUsers: RequestHandler = async (req, res) => {
       }
     }
     if (card_4) {
-      const fu4 = await User.findOne({ card_id: card_2 });
+      const fu4 = await User.findOne({ card_id: card_4 });
       if (fu4) {
         users_id.push(fu4._id.toString());
         if (category.filter?.male || category.filter?.female) {
@@ -405,7 +404,6 @@ export const checkUsers: RequestHandler = async (req, res) => {
           .json({ msg: `Usuario con C.I: ${card_4} no encontrado.` });
       }
     }
-
     if (category.filter?.male && auxMal > category.filter?.male) {
       return res
         .status(403)
