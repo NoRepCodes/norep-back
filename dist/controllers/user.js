@@ -300,7 +300,7 @@ exports.registerTicket = registerTicket;
 const checkUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (debug)
-        console.log("#checkUser");
+        console.log("#checkUsers");
     try {
         const { captain, card_2, card_3, card_4, category } = req.body;
         let auxFem = 0;
@@ -314,6 +314,7 @@ const checkUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             ? new Date(`${2024 - am}-${new Date().getMonth()}-${new Date().getDay()}`)
             : undefined;
         let users_id = [captain._id];
+        console.log(auxFem);
         if (captain) {
             if (((_c = category.filter) === null || _c === void 0 ? void 0 : _c.male) || ((_d = category.filter) === null || _d === void 0 ? void 0 : _d.female)) {
                 if (captain.genre === "Masculino")
@@ -360,7 +361,7 @@ const checkUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             }
         }
         if (card_3) {
-            const fu3 = yield userSchema_1.default.findOne({ card_id: card_2 });
+            const fu3 = yield userSchema_1.default.findOne({ card_id: card_3 });
             if (fu3) {
                 users_id.push(fu3._id.toString());
                 if (((_g = category.filter) === null || _g === void 0 ? void 0 : _g.male) || ((_h = category.filter) === null || _h === void 0 ? void 0 : _h.female)) {
@@ -387,7 +388,7 @@ const checkUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             }
         }
         if (card_4) {
-            const fu4 = yield userSchema_1.default.findOne({ card_id: card_2 });
+            const fu4 = yield userSchema_1.default.findOne({ card_id: card_4 });
             if (fu4) {
                 users_id.push(fu4._id.toString());
                 if (((_j = category.filter) === null || _j === void 0 ? void 0 : _j.male) || ((_k = category.filter) === null || _k === void 0 ? void 0 : _k.female)) {
