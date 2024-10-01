@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEmail = exports.rejectTicket = exports.approveTicket = exports.pushTicket = exports.getTickets = exports.checkUsers = exports.registerTicket = exports.deleteAdmin = exports.createAdmin = exports.getUserRedcords = exports.registerTeam = exports.registerUser = exports.login = void 0;
+exports.getUsers2 = exports.getUsers = exports.sendEmail = exports.rejectTicket = exports.approveTicket = exports.pushTicket = exports.getTickets = exports.checkUsers = exports.registerTicket = exports.deleteAdmin = exports.createAdmin = exports.getUserRedcords = exports.registerTeam = exports.registerUser = exports.login = void 0;
 const uploadImages_1 = require("../helpers/uploadImages");
 const userSchema_1 = __importDefault(require("../models/userSchema"));
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
@@ -83,7 +83,6 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         console.log("#register");
     try {
         const { name, pass, email, card_id, birth, box, genre, location, shirt, phone, } = req.body;
-        console.log("something is wird");
         const ifEmail = yield userSchema_1.default.find({ email: email.toLowerCase() });
         if (ifEmail.length > 0)
             return res.status(403).json({ msg: "Correo en uso" });
@@ -213,7 +212,7 @@ const deleteAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.deleteAdmin = deleteAdmin;
 const registerTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a;
     if (debug)
         console.log("#registerTicket");
     try {
@@ -225,8 +224,11 @@ const registerTicket = (req, res) => __awaiter(void 0, void 0, void 0, function*
         if (result === null)
             return res.status(404).json({ msg: "Categoría no encontrada" });
         cindex = result.categories.findIndex((c) => c._id.toString() === category_id);
-        if (((_b = (_a = result.categories[cindex].filter) === null || _a === void 0 ? void 0 : _a.limit) !== null && _b !== void 0 ? _b : 999) <=
-            result.categories[cindex].teams.length) {
+        if (
+        // (result.categories[cindex].filter?.limit ?? 999) <=
+        // result.categories[cindex].teams.length
+        result.categories[cindex].slots >=
+            ((_a = result.categories[cindex].filter.limit) !== null && _a !== void 0 ? _a : 999)) {
             return res.status(403).json({ msg: "Límite de equipos alcanzado" });
         }
         if (result.categories[cindex].teams.some((t) => t.name === inputs.name)) {
@@ -566,7 +568,7 @@ const sendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 from: "norep.code@yahoo.com",
                 to: user.email,
                 subject: `Haz sido admitido en el evento STRONG ENDURANCE!`,
-                html: emailMsg('los odiosos', 'strong endurance', 'avanzado', '66b4e80393c333245f375286'),
+                html: emailMsg("los odiosos", "strong endurance", "avanzado", "66b4e80393c333245f375286"),
             };
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
@@ -584,6 +586,61 @@ const sendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.sendEmail = sendEmail;
+////zunfest 66b4e80393c333245f375286
+const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (debug)
+        console.log("#namehere");
+    try {
+        //@ts-ignore
+        const evt = yield eventSchema_1.default.findOne({
+            name: "Zunfest 2024",
+        }).populate("categories.teams.users", "name card_id phone shirt email genre");
+        if (!evt)
+            return res.send("ok");
+        let aux = [];
+        evt.categories.forEach((categ) => {
+            categ.teams.forEach((team) => {
+                let t = {
+                    users: team.users,
+                    tname: team.name,
+                };
+                aux.push(t);
+            });
+        });
+        res.send(aux);
+        // res.send('ok')
+    }
+    catch (error) {
+        res.status(400).json({ msg: error.message });
+    }
+});
+exports.getUsers = getUsers;
+const getUsers2 = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (debug)
+        console.log("#namehere");
+    try {
+        //@ts-ignore
+        const tkts = yield ticketSchema_1.default.find({
+            event: "Zunfest 2024",
+        }).populate("users", "name card_id phone shirt email genre");
+        if (!tkts)
+            return res.send("ok");
+        let aux = [];
+        tkts.forEach((tick) => {
+            let t = {
+                users: tick.users,
+                tname: tick.name,
+            };
+            aux.push(t);
+        });
+        res.send(aux);
+        // res.send('ok')
+    }
+    catch (error) {
+        res.status(400).json({ msg: error.message });
+    }
+});
+exports.getUsers2 = getUsers2;
 // export const namehere:RequestHandler = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {
@@ -606,10 +663,4 @@ const emailMsg = (team, event, category, event_id) => {
   </body>
   `;
 };
-/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
- 
-Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
-  
-En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
-*/ 
 //# sourceMappingURL=user.js.map
