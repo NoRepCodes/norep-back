@@ -21,5 +21,7 @@ router.post('/deleteAdmin', usr.deleteAdmin)
 router.get('/getUserRedcords', usr.getUserRedcords)
 
 router.get('/sendEmail', usr.sendEmail)
+router.get('/getUsers', usr.getUsers)
+router.get('/getUsers2', usr.getUsers2)
 
 export default router

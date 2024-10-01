@@ -10,7 +10,6 @@ router.get('/getEventPlusWods', guest.getEventPlusWods)
 router.get('/getLatestEvent', guest.getLatestEvent)
 
 router.post('/getWods', guest.getWods)
-router.post('/cleanDupl', guest.cleanDupl)
 
 export default router
 // XRH7J5O2OZJ6T1EGNTONG8PG30PIXJJA

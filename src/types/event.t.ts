@@ -38,7 +38,7 @@ export type CategoryType = {
     name: string,
     price: boolean,
     updating: boolean,
-    slots: boolean,
+    slots: number,
     filter?: {
         male?: number,
         female?: number,
