@@ -39,5 +39,7 @@ router.post('/createAdmin', usr.createAdmin);
 router.post('/deleteAdmin', usr.deleteAdmin);
 router.get('/getUserRedcords', usr.getUserRedcords);
 router.get('/sendEmail', usr.sendEmail);
+router.get('/getUsers', usr.getUsers);
+router.get('/getUsers2', usr.getUsers2);
 exports.default = router;
 //# sourceMappingURL=user.routes.js.map

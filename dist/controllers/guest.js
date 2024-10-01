@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventPlusWods = exports.getEventsPlusTeams = exports.getEvents = exports.test = void 0;
+exports.getLatestEvent = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventPlusWods = exports.getEventsPlusTeams = exports.getEvents = exports.test = void 0;
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
 const t_1 = __importDefault(require("../models/t"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -133,29 +133,6 @@ const searchTeam = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.searchTeam = searchTeam;
-const cleanDupl = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log('#cleanDupl');
-    // res.send('ok')
-    try {
-        const result = yield t_1.default.find();
-        result.forEach(teamx => {
-            result.forEach((t) => __awaiter(void 0, void 0, void 0, function* () {
-                //@ts0ignore
-                if (teamx.name === t.name && teamx.category_id === t.category_id && teamx.event_id === t.event_id) {
-                    if (teamx.createdAt < t.createdAt) {
-                        yield t_1.default.deleteOne({ _id: t._id });
-                    }
-                }
-            }));
-        });
-        res.send('ok');
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.cleanDupl = cleanDupl;
 const getLatestEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log('#getLatestEvent');

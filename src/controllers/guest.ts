@@ -117,28 +117,6 @@ export const searchTeam: RequestHandler = async (req, res) => {
     }
 }
 
-export const cleanDupl: RequestHandler = async (req, res) => {
-    if (debug) console.log('#cleanDupl')
-    // res.send('ok')
-    try {
-        const result = await Team.find()
-        result.forEach(teamx => {
-            result.forEach(async (t) => {
-                //@ts0ignore
-                if (teamx.name === t.name && teamx.category_id === t.category_id && teamx.event_id === t.event_id) {
-                    if (teamx.createdAt < t.createdAt) {
-                        await Team.deleteOne({ _id: t._id })
-                    }
-                }
-
-            })
-        });
-        res.send('ok')
-    } catch (error:any) {
-        res.status(400).json({ msg: error.message })
-    }
-}
-
 
 export const getLatestEvent:RequestHandler = async (req,res)=>{
     if(debug) console.log('#getLatestEvent')
