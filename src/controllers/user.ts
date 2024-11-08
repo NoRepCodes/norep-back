@@ -224,7 +224,7 @@ export const registerTicket: RequestHandler = async (req, res) => {
       // (result.categories[cindex].filter?.limit ?? 999) <=
       // result.categories[cindex].teams.length
       result.categories[cindex].slots >=
-      (result.categories[cindex].filter.limit??999)
+      (result.categories[cindex].filter.limit ?? 999)
     ) {
       return res.status(403).json({ msg: "Límite de equipos alcanzado" });
     }
@@ -579,7 +579,7 @@ export const sendEmail: RequestHandler = async (req, res) => {
 
 ////zunfest 66b4e80393c333245f375286
 export const getUsers: RequestHandler = async (req, res) => {
-  if (debug) console.log("#namehere");
+  if (debug) console.log("#getUsers");
   try {
     //@ts-ignore
     const evt: EventType = await Event.findOne({
@@ -592,9 +592,20 @@ export const getUsers: RequestHandler = async (req, res) => {
     let aux: any[] = [];
     evt.categories.forEach((categ) => {
       categ.teams.forEach((team) => {
+        let aux1: any = [];
+        team.users.forEach((usr: any) => {
+          aux1.push({
+            nombre: usr.name,
+            correo: usr.email,
+            talla: usr.shirt,
+            tlf: usr.phone,
+            genero: usr.genre,
+            ci: usr.card_id,
+          });
+        });
         let t = {
-          users: team.users,
-          tname: team.name,
+          nombreEquipo: team.name,
+          users: aux1,
         };
         aux.push(t);
       });
@@ -607,7 +618,7 @@ export const getUsers: RequestHandler = async (req, res) => {
 };
 
 export const getUsers2: RequestHandler = async (req, res) => {
-  if (debug) console.log("#namehere");
+  if (debug) console.log("#getUsers2");
   try {
     //@ts-ignore
     const tkts: TicketT[] = await Ticket.find({
@@ -616,9 +627,20 @@ export const getUsers2: RequestHandler = async (req, res) => {
     if (!tkts) return res.send("ok");
     let aux: any[] = [];
     tkts.forEach((tick) => {
+      let aux1: any = [];
+      tick.users.forEach((usr: any) => {
+        aux1.push({
+          nombre: usr.name,
+          correo: usr.email,
+          talla: usr.shirt,
+          tlf: usr.phone,
+          genero: usr.genre,
+          ci: usr.card_id,
+        });
+      });
       let t = {
-        users: tick.users,
-        tname: tick.name,
+        nombreEquipo: tick.name,
+        users: aux1,
       };
       aux.push(t);
     });
