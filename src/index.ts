@@ -1,29 +1,60 @@
-import express from 'express'
-import routeGuest from './routes/guest.routes'
-import routeEvent from './routes/event.routes'
-import routeUser from './routes/user.routes'
-//@ts-ignore
-import cors from 'cors'
-import './db'
-const app = express()
+import express from "npm:express";
+import routeGuest from "./routes/guest.routes.ts";
+import routeEvent from "./routes/event.routes.ts";
+import routeUser from "./routes/user.routes.ts";
 
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.json({ limit: '50mb' }));
-app.use(cors({
-    origin: "*",
-}));
+import "./db.ts";
+
+const app = express();
+
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "50mb" }));
+
+app.use(routeGuest);
+app.use(routeEvent);
+app.use(routeUser);
+
+app.listen(4000, () => {
+  console.log("Server listen on port", 4000);
+});
+
+/*
+
+deno run -A --watch src/index.ts
+
+
+Dropdown:
+
+- Be normal state
+- Open and then fetch data
+- Show load icon 
+- Receive data and display + remove icon
+- Do animations
+
+
+# # # TODO + PROGRESS ➰✅❓❌
+# 
+# CREATE EVERY TABLE ➰
+# # CRUD FOR EVENTS ➰
+# # CRUD FOR CATEGORIES ➰
+# # CRUD FOR WODS
+# # CRUD FOR RESULTS
+# # CRUD FOR USERS
+# 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 
 
 
-app.use(routeEvent)
-app.use(routeUser)
-app.use(routeGuest)
 
-app.listen(process.env.PORT || 4000, () => {
-    console.log('Server listen on port', 4000)
-})
 
-// TO DO ✅ ❌ ⏳ ❓
-/**
- * 
- */
+
+*/

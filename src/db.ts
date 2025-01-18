@@ -1,17 +1,14 @@
-import { connect,set } from 'mongoose'
-import dotenv from 'dotenv'
-dotenv.config()
-const connectDB = async () => {
-  try {
-    set("strictQuery", false);
-    await connect(process.env.MONGODB_URI ?? '')
-      .then(db => console.log('Database is connected'))
-      .catch(err => console.log(err))
+// deno-lint-ignore-file no-explicit-any
 
-  } catch (error) {
-    console.log(error)
-  }
-
-}
-
-connectDB()
+import pg from 'npm:pg'
+const {Pool} = pg
+ 
+const pool = new Pool({
+  user: 'postgres',
+  password:'123123123',
+  host: 'localhost',
+  port:5432,
+  database:"norep-test"
+})
+ 
+export const query = (text:string, params?:any) => pool.query(text, params)

@@ -1,15 +1,17 @@
-import { Router } from 'express'
+import {Router } from 'npm:express'
 const router = Router()
 
-import *as guest from '../controllers/guest'
+import *as guest from '../controllers/guest.ts'
 
 // router.get('/uri', guest.uri)
-router.get('/', guest.test)
-router.get('/getEvents', guest.getEvents)
-router.get('/getEventPlusWods', guest.getEventPlusWods)
-router.get('/getLatestEvent', guest.getLatestEvent)
+// router.get('/', guest.test)
+// router.get('/getEvents', guest.getEvents)
+// router.get('/getEventPlusWods', guest.getEventPlusWods)
+// router.get('/getLatestEvent', guest.getLatestEvent)
 
-router.post('/getWods', guest.getWods)
+// router.post('/getWods', guest.getWods)
+
+router.get("/getEvent/:_id",guest.getEvent)
 
 export default router
 // XRH7J5O2OZJ6T1EGNTONG8PG30PIXJJA
