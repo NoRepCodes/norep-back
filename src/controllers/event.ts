@@ -1,20 +1,21 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   deleteImage,
   deleteImages,
-  Image,
+  // Image,
   uploadImage,
   uploadImages,
-} from "../helpers/uploadImages";
-import { RequestHandler } from "express";
-import Event from "../models/eventSchema";
-import Wod from "../models/wodSchema";
-import User from "../models/wodSchema";
+} from "../helpers/uploadImages.ts";
+import { ReqRes } from "../helpers/utils.ts";
+import Event from "../models/eventSchema.ts";
+import Wod from "../models/wodSchema.ts";
+// import User from "../models/wodSchema.ts";
 // import moment from "moment";
-import { EventType, ResultType, WodType } from "../types/event.t";
-import { Types } from "mongoose";
+import { WodType } from "../types/event.t.ts";
+import { Types } from "npm:mongoose";
 const debug = true;
 // EVENTS
-export const createEvent: RequestHandler = async (req, res) => {
+export const createEvent: ReqRes = async (req, res) => {
   // if (debug) console.log('#createEvent')
   try {
     const {
@@ -61,7 +62,7 @@ export const createEvent: RequestHandler = async (req, res) => {
   }
 };
 
-export const updateEvent: RequestHandler = async (req, res) => {
+export const updateEvent: ReqRes = async (req, res) => {
   // if (debug) console.log('#updateEvent')
   try {
     const {
@@ -84,16 +85,16 @@ export const updateEvent: RequestHandler = async (req, res) => {
     if (evnt === null || evnt === undefined)
       return res.status(400).json({ msg: "Evento no encontrado" });
     let bool = false;
-    categories.forEach((c:any) => {
+    categories.forEach((c: any) => {
       c._id = new Types.ObjectId(c._id);
-      //@ts-ignore
+      //@ts-ignore ?
       // const i = evnt.categories.findIndex(categ => categ._id.toString() === c._id)
       const categ = evnt.categories.find((categ) => categ._id === c._id);
-      //@ts-ignore
+      //@ts-ignore ?
       if (categ && categ?.teams.length !== c.teams?.length) bool = true;
-      //@ts-ignore
+      //@ts-ignore ?
       else if (categ && categ?.teams.length === c.teams?.length)
-        //@ts-ignore
+        //@ts-ignore ?
         c.teams = [...categ.teams];
     });
     if (bool)
@@ -111,10 +112,11 @@ export const updateEvent: RequestHandler = async (req, res) => {
     evnt.since = since;
     evnt.until = until;
     evnt.dues = dues;
+    //@ts-ignore ?
     evnt.partners = partners;
     evnt.place = place;
     evnt.accesible = accesible;
-    //@ts-ignore
+    //@ts-ignore ?
     evnt.categories = categories;
     evnt.secure_url = secure_url;
     evnt.public_id = public_id;
@@ -132,7 +134,7 @@ export const updateEvent: RequestHandler = async (req, res) => {
   }
 };
 
-export const deleteEvent: RequestHandler = async (req, res) => {
+export const deleteEvent: ReqRes = async (req, res) => {
   // if (debug) console.log('#deleteEvent')
   try {
     const { _id, public_id, partners } = req.body;
@@ -149,7 +151,7 @@ export const deleteEvent: RequestHandler = async (req, res) => {
 };
 
 /// WODS
-export const updateWods: RequestHandler = async (req, res) => {
+export const updateWods: ReqRes = async (req, res) => {
   // if (debug) console.log('#namehere')
   try {
     const { wods, toDelete, categories } = req.body;
@@ -174,10 +176,10 @@ export const updateWods: RequestHandler = async (req, res) => {
     //   ...wods.map((w:any) => updWod(w)),
     //   delWods(),
     // ]);
-    for (const w of wods){
-      await updWod(w)
+    for (const w of wods) {
+      await updWod(w);
     }
-    delWods()
+    delWods();
     const findWods = await Wod.find({
       category_id: { $in: categories },
     });
@@ -188,17 +190,16 @@ export const updateWods: RequestHandler = async (req, res) => {
   }
 };
 
-
-export const updateResults: RequestHandler = async (req, res) => {
+export const updateResults: ReqRes = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
     const { wod_id, results, categories } = req.body;
 
-    const notExist = results.some((team_res:any) => !team_res.team_id);
+    const notExist = results.some((team_res: any) => !team_res.team_id);
     if (notExist)
       return res.status(404).json({ msg: "Uno de los equipos no existe" });
 
-    const w = await Wod.findOneAndUpdate(
+    await Wod.findOneAndUpdate(
       { _id: wod_id },
       {
         $set: { results },
@@ -213,12 +214,12 @@ export const updateResults: RequestHandler = async (req, res) => {
   }
 };
 
-export const updateTeams: RequestHandler = async (req, res) => {
+export const updateTeams: ReqRes = async (req, res) => {
   if (debug) console.log("#updateTeams");
   try {
     const { teams, category_id } = req.body;
-    let aux = [...teams];
-    aux.forEach((team: any, i) => {
+    const aux = [...teams];
+    aux.forEach((team: any) => {
       // if(team._id ==='_') aux[i]._id===undefined
       // if(team.captain ==='_') aux[i].captain===undefined
       if (team._id === "_") team._id = undefined;
@@ -237,7 +238,7 @@ export const updateTeams: RequestHandler = async (req, res) => {
   }
 };
 
-export const toggleUpdating: RequestHandler = async (req, res) => {
+export const toggleUpdating: ReqRes = async (req, res) => {
   if (debug) console.log("#toggleUpdating");
   try {
     const { category_id, state } = req.body;
@@ -259,7 +260,7 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
   }
 };
 
-// export const migration: RequestHandler = async (req, res) => {
+// export const migration: ReqRes = async (req, res) => {
 //   if (debug) console.log("#migration");
 //   try {
 //     const user = await User.find();
@@ -269,7 +270,7 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
 //   }
 // };
 
-// export const namehere:RequestHandler = async (req,res)=>{
+// export const namehere:ReqRes = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {
 //         res.send('ok')
@@ -277,7 +278,7 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
 //         res.status(400).json({ msg: error.message })
 //     }
 //
-// export const namehere:RequestHandler = async (req,res)=>{
+// export const namehere:ReqRes = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {
 //         res.send('ok')

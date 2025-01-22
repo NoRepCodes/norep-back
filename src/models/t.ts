@@ -1,6 +1,6 @@
 
-import { Schema, model, SchemaTypes } from 'mongoose'
-const objId = SchemaTypes.ObjectId
+import { Schema, model } from 'npm:mongoose'
+// const objId = SchemaTypes.ObjectId
 
 // const wodRes = new Schema({
 //     amount_type: { type: String, required: true },
@@ -28,11 +28,11 @@ const TeamSchema = new Schema({
     }
 );
 
-function getDec(value:any) {
-    if (typeof value !== 'undefined') {
-        return parseFloat(value.toString());
-    }
-    return value;
-};
+// function getDec(value:any) {
+//     if (typeof value !== 'undefined') {
+//         return parseFloat(value.toString());
+//     }
+//     return value;
+// };
 
 export default model('Team', TeamSchema)

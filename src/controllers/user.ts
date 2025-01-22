@@ -1,28 +1,21 @@
-import {
-  deleteImage,
-  deleteImages,
-  Image,
-  uploadImage,
-  uploadImages,
-} from "../helpers/uploadImages";
-import { RequestHandler } from "express";
-import User from "../models/userSchema";
-import { UserType } from "../types/user.t";
-import moment from "moment";
-import { CategoryType, EventType, TeamType } from "../types/event.t";
-import Event from "../models/eventSchema";
-import Wods from "../models/wodSchema";
-import { Document } from "mongoose";
-import Admin from "../models/adminSchema";
-//@ts-ignore
-import bcrypt from "bcrypt";
-import Ticket from "../models/ticketSchema";
-//@ts-ignore
-import nodemailer from "nodemailer";
+// deno-lint-ignore-file no-explicit-any
+import { uploadImage } from "../helpers/uploadImages.ts";
+import User from "../models/userSchema.ts";
+import { EventType } from "../types/event.t.ts";
+import Event from "../models/eventSchema.ts";
+import Wods from "../models/wodSchema.ts";
+import { Document } from "npm:mongoose";
+import Admin from "../models/adminSchema.ts";
+//@ts-ignore ?
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+import Ticket from "../models/ticketSchema.ts";
+//@ts-ignore ?
+import nodemailer from "npm:nodemailer";
+import { ReqRes } from "../helpers/utils.ts";
 
 const debug = true;
 
-export const login: RequestHandler = async (req, res) => {
+export const login: ReqRes = async (req, res) => {
   if (debug) console.log("#login");
   try {
     const { email, pass } = req.body;
@@ -32,7 +25,7 @@ export const login: RequestHandler = async (req, res) => {
       // const { username, password } = req.body;
       const adm: any = await Admin.findOne({ username: email });
       if (adm) {
-        bcrypt.compare(pass, adm.password).then(function (result:any) {
+        bcrypt.compare(pass, adm.password).then(function (result: any) {
           if (result) {
             res.send({
               username: adm.username,
@@ -44,23 +37,23 @@ export const login: RequestHandler = async (req, res) => {
         });
       }
     } else {
-      const user = await User.findOne({ email:email.toLowerCase() });
+      console.log(bcrypt.hashSync('123123', bcrypt.genSaltSync(10)));
+      const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) return res.status(401).json({ msg: "Correo incorrecto" });
-      bcrypt.compare(pass, user.password, function (_: any, result: any) {
-        if (!result)
-          return res.status(401).json({ msg: "Contraseña incorrecta" });
-        //@ts-ignore
-        const { passsword: _x, ...allData } = user;
-        //@ts-ignore
-        return res.send(allData._doc);
-      });
+      const isPassword = await bcrypt.compare(pass, user.password);
+      if (!isPassword)
+        return res.status(401).json({ msg: "Contraseña incorrecta" });
+      //@ts-ignore ?
+      const { passsword: _x, ...allData } = user;
+      //@ts-ignore ?
+      return res.send(allData._doc);
     }
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
 };
 
-export const registerUser: RequestHandler = async (req, res) => {
+export const registerUser: ReqRes = async (req, res) => {
   if (debug) console.log("#register");
   try {
     const {
@@ -83,11 +76,11 @@ export const registerUser: RequestHandler = async (req, res) => {
     if (ifCard.length > 0)
       return res.status(403).json({ msg: "Cédula en uso" });
     else {
-      let password = bcrypt.hashSync(pass, bcrypt.genSaltSync(10));
+      const password = bcrypt.hashSync(pass, bcrypt.genSaltSync(10));
       const result = await User.create({
         password,
         name,
-        email:email.toLowerCase(),
+        email: email.toLowerCase(),
         shirt,
         card_id,
         genre,
@@ -98,7 +91,7 @@ export const registerUser: RequestHandler = async (req, res) => {
         // birth: moment(new Date(birth)).unix(),
       });
       const { password: _, ...allData } = result;
-      //@ts-ignore
+      //@ts-ignore ?
       res.send(allData._doc);
     }
   } catch (error: any) {
@@ -106,7 +99,7 @@ export const registerUser: RequestHandler = async (req, res) => {
   }
 };
 
-export const registerTeam: RequestHandler = async (req, res) => {
+export const registerTeam: ReqRes = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
     // TO DO:
@@ -167,7 +160,7 @@ export const registerTeam: RequestHandler = async (req, res) => {
   }
 };
 
-export const getUserRedcords: RequestHandler = async (req, res) => {
+export const getUserRedcords: ReqRes = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
     // const filter = {
@@ -180,21 +173,19 @@ export const getUserRedcords: RequestHandler = async (req, res) => {
   }
 };
 
-export const createAdmin: RequestHandler = async (req, res) => {
+export const createAdmin: ReqRes = async (req, res) => {
   if (debug) console.log("#createAdmin");
   try {
     const { username, pass } = req.body;
-    bcrypt.hash(pass, 7, async (err:any, hash:any) => {
-      // Store hash in your password DB.
-      const result = await Admin.create({ username, password: hash });
-      res.send(result);
-    });
+    const password = await bcrypt.hash(pass, "7");
+    const result = await Admin.create({ username, password });
+    res.send(result);
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
 };
 
-export const deleteAdmin: RequestHandler = async (req, res) => {
+export const deleteAdmin: ReqRes = async (req, res) => {
   if (debug) console.log("#deleteAdmin");
   try {
     const { _id } = req.body;
@@ -205,7 +196,7 @@ export const deleteAdmin: RequestHandler = async (req, res) => {
   }
 };
 
-export const registerTicket: RequestHandler = async (req, res) => {
+export const registerTicket: ReqRes = async (req, res) => {
   if (debug) console.log("#registerTicket");
   try {
     const { users, category_id, inputs, image, phone } = req.body;
@@ -300,25 +291,25 @@ export const registerTicket: RequestHandler = async (req, res) => {
   }
 };
 
-export const checkUsers: RequestHandler = async (req, res) => {
+export const checkUsers: ReqRes = async (req, res) => {
   if (debug) console.log("#checkUser");
   try {
     const { captain, card_2, card_3, card_4, category } = req.body;
     let auxFem = 0;
     let auxMal = 0;
-    let am = category.filter?.age_min;
-    let amax = category.filter?.age_max;
+    const am = category.filter?.age_min;
+    const amax = category.filter?.age_max;
 
-    let age_max = amax
+    const age_max = amax
       ? new Date(
           `${2024 - amax}-${new Date().getMonth()}-${new Date().getDay()}`
         )
       : undefined;
-    let age_min = am
+    const age_min = am
       ? new Date(`${2024 - am}-${new Date().getMonth()}-${new Date().getDay()}`)
       : undefined;
 
-    let users_id = [captain._id];
+    const users_id = [captain._id];
 
     if (captain) {
       if (category.filter?.male || category.filter?.female) {
@@ -422,7 +413,7 @@ export const checkUsers: RequestHandler = async (req, res) => {
   }
 };
 
-export const getTickets: RequestHandler = async (req, res) => {
+export const getTickets: ReqRes = async (_, res) => {
   if (debug) console.log("#getTickets");
   try {
     const results = await Ticket.find().populate("users", "name");
@@ -432,7 +423,7 @@ export const getTickets: RequestHandler = async (req, res) => {
   }
 };
 
-export const pushTicket: RequestHandler = async (req, res) => {
+export const pushTicket: ReqRes = async (req, res) => {
   if (debug) console.log("#pushTicket");
   try {
     const { captain_id, transf, payDues, img } = req.body;
@@ -460,7 +451,7 @@ export const pushTicket: RequestHandler = async (req, res) => {
   }
 };
 
-export const approveTicket: RequestHandler = async (req, res) => {
+export const approveTicket: ReqRes = async (req, res) => {
   if (debug) console.log("#approveTicket");
   try {
     const { ticket } = req.body;
@@ -480,25 +471,31 @@ export const approveTicket: RequestHandler = async (req, res) => {
       // await deleteImage(ticket.public_id);
       await Ticket.findOneAndDelete({ _id: ticket._id });
       const results = await Ticket.find();
-      
-      let transporter = nodemailer.createTransport({
+
+      const transporter = nodemailer.createTransport({
         service: "yahoo",
         auth: {
           user: "norep.code@yahoo.com",
           pass: "lgippxsozkcbrovy",
         },
       });
-  
-      
-      const users = await User.find({ _id: { $in: ticket.users } }, { email: 1 });
-  
+
+      const users = await User.find(
+        { _id: { $in: ticket.users } },
+        { email: 1 }
+      );
+
       users.forEach((user) => {
-        let mailOptions = {
+        const mailOptions = {
           from: "norep.code@yahoo.com",
           to: user.email,
           subject: `Haz sido admitido en el evento ${ticket.event.toUpperCase()}!`,
-          html: emailMsg(ticket.name,ticket.event,ticket.category,event._id.toString()),
-          
+          html: emailMsg(
+            ticket.name,
+            ticket.event,
+            ticket.category,
+            event._id.toString()
+          ),
         };
         transporter.sendMail(mailOptions, (error: any, info: any) => {
           if (error) {
@@ -508,14 +505,14 @@ export const approveTicket: RequestHandler = async (req, res) => {
           }
         });
       });
-      
+
       res.send(results);
     } else res.status(404).json({ msg: "Evento no encontrado." });
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
 };
-export const rejectTicket: RequestHandler = async (req, res) => {
+export const rejectTicket: ReqRes = async (req, res) => {
   if (debug) console.log("#rejectTicket");
   try {
     const { ticket } = req.body;
@@ -530,10 +527,10 @@ export const rejectTicket: RequestHandler = async (req, res) => {
   }
 };
 
-export const sendEmail: RequestHandler = async (req, res) => {
+export const sendEmail: ReqRes = async (_, res) => {
   if (debug) console.log("#sendEmail");
   try {
-    let transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       //lgippxsozkcbrovy
       service: "yahoo",
       auth: {
@@ -542,17 +539,20 @@ export const sendEmail: RequestHandler = async (req, res) => {
       },
     });
 
-    
     const ticket = { users: "66b68416b5a9026a6d13cb4d" };
     const users = await User.find({ _id: { $in: ticket.users } }, { email: 1 });
 
     users.forEach((user) => {
-      let mailOptions = {
+      const mailOptions = {
         from: "norep.code@yahoo.com",
         to: user.email,
         subject: `Haz sido admitido en el evento STRONG ENDURANCE!`,
-        html: emailMsg('los odiosos','strong endurance','avanzado','66b4e80393c333245f375286'),
-        
+        html: emailMsg(
+          "los odiosos",
+          "strong endurance",
+          "avanzado",
+          "66b4e80393c333245f375286"
+        ),
       };
       transporter.sendMail(mailOptions, (error: any, info: any) => {
         if (error) {
@@ -567,7 +567,7 @@ export const sendEmail: RequestHandler = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
-// export const namehere:RequestHandler = async (req,res)=>{
+// export const namehere:ReqRes = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {
 //         res.send('ok')
@@ -577,8 +577,12 @@ export const sendEmail: RequestHandler = async (req, res) => {
 //
 // }
 
-
-const emailMsg = (team:string,event:string,category:string,event_id:string)=>{
+const emailMsg = (
+  team: string,
+  event: string,
+  category: string,
+  event_id: string
+) => {
   return `<body>
     <div style="width:500px;padding:2em;box-sizing:border-box">
       <h1 style="font-family: sans-serif; font-weight: 600;font-style: normal;color: black;" >${team.toUpperCase()}</h1>
@@ -589,12 +593,9 @@ const emailMsg = (team:string,event:string,category:string,event_id:string)=>{
       <a href="https://www.norep.com.ve/resultados/${event_id}" target="_blank" style="color: black;font-style: normal;font-weight: 600;font-family:  sans-serif;background-color: #F1FF48;border: 1px solid #191919;font-size: 1.3em;padding: .5em 1em;color: #191919;cursor: pointer;text-decoration: none;" href="/" >IR AL EVENTO</a>
     </div>
   </body>
-  `
-}
+  `;
+};
 
-/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
- 
-Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
-  
-En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
-*/
+/* old $2b$10$/pMRYNcOjpZ4.APiBsIRxuHJ1WM5p6DatLpybujBUPp5F9oPlXgnu
+ * new $2a$10$Xro5dVrNMESDO4XKOmx/GeR2/Lzvb5bG8vCkAzxSHR7JMLxJVkm3y
+ */

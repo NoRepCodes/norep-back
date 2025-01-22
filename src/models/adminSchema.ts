@@ -1,4 +1,4 @@
-import { Schema, model, SchemaTypes } from 'mongoose'
+import { Schema, model } from 'npm:mongoose'
 
 const AdminSchema = new Schema({
     username: String,

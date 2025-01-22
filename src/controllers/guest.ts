@@ -1,28 +1,28 @@
-import Event from "../models/eventSchema"
-import Team from "../models/t"
-import { RequestHandler } from 'express'
-import dotenv from 'dotenv'
-import { EventType } from "../types/event.t";
-import Wod from "../models/wodSchema";
-dotenv.config()
+// deno-lint-ignore-file no-explicit-any
+import Event from "../models/eventSchema.ts"
+import Team from "../models/t.ts"
+import { EventType } from "../types/event.t.ts";
+import Wod from "../models/wodSchema.ts";
+import { ReqRes } from "../helpers/utils.ts";
 const debug = false
 
 
-export const uri: RequestHandler = async (req, res) => {
+export const uri: ReqRes =  (_, res) => {
     if (debug) console.log('#test')
 
-    res.send(process.env.MONGODB_URI)
+    // res.send(process.env.MONGODB_URI)
+    res.send('ok')
 }
-export const test: RequestHandler = async (req, res) => {
+export const test: ReqRes =  (_, res) => {
     if (debug) console.log('#test')
 
     // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
     // res.send('version 2.1.3')
-    // res.send('NOREP ONLINE')
-    res.send(process.env.MONGODB_URI)
+    res.send('NOREP ONLINE')
+    // res.send(Deno.env.get('MONGODB_URI'))
 }
 
-export const getEvents: RequestHandler = async (req, res) => {
+export const getEvents: ReqRes = async (_, res) => {
     if (debug) console.log('#getEvents')
     try {
         const events = await Event.find().lean()
@@ -31,13 +31,13 @@ export const getEvents: RequestHandler = async (req, res) => {
         res.status(400).json({ msg: error.message })
     }
 }
-export const getEventsPlusTeams: RequestHandler = async (req, res) => {
+export const getEventsPlusTeams: ReqRes = async (_, res) => {
     if (debug) console.log('#getEventsPlusTeams')
     try {
         const events = await Event.find()
         const teams = await Team.find()
 
-        let data = [events, teams]
+        const data = [events, teams]
         res.send(data)
     } catch (error: any) {
         res.status(400).json({ msg: error.message })
@@ -56,16 +56,17 @@ export const getEventsPlusTeams: RequestHandler = async (req, res) => {
 //     }
 // }
 
-export const getEventPlusWods: RequestHandler = async (req, res) => {
+export const getEventPlusWods: ReqRes = async (req, res) => {
     if (debug) console.log('#getEventPlusWods')
     try {
         const { _id } = req.query
+        //@ts-ignore IDK MAN, IM SCARED
         const events: EventType[] = await Event.find().lean()
         // console.log(events)
         const event: EventType | undefined = events.find(ev => ev._id.toString() === _id)
         if (event === undefined) res.status(404).json({ msg: "Evento no encontrado" })
         else {
-            let categories = event.categories.map(c => c._id)
+            const categories = event.categories.map(c => c._id)
             const wods = await Wod.find({ category_id: { '$in': categories } })
             // let data = [events, +moment()]
             res.send({ events, wods })
@@ -76,7 +77,7 @@ export const getEventPlusWods: RequestHandler = async (req, res) => {
     }
 }
 
-export const getWods: RequestHandler = async (req, res) => {
+export const getWods: ReqRes = async (req, res) => {
     if (debug) console.log('#getWods')
     try {
         const { categories } = req.body
@@ -90,7 +91,7 @@ export const getWods: RequestHandler = async (req, res) => {
 
 
 
-export const toggleUpdating: RequestHandler = async (req, res) => {
+export const toggleUpdating: ReqRes = async (req, res) => {
     if (debug) console.log('#toggleUpdating')
     try {
         const { event_id, state } = req.body
@@ -103,7 +104,7 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
 }
 
 
-export const searchTeam: RequestHandler = async (req, res) => {
+export const searchTeam: ReqRes = async (req, res) => {
     if (debug) console.log('#loginAdmin')
     try {
         const { searchName } = req.body
@@ -117,7 +118,7 @@ export const searchTeam: RequestHandler = async (req, res) => {
     }
 }
 
-export const cleanDupl: RequestHandler = async (req, res) => {
+export const cleanDupl: ReqRes = async (_, res) => {
     if (debug) console.log('#cleanDupl')
     // res.send('ok')
     try {
@@ -140,7 +141,7 @@ export const cleanDupl: RequestHandler = async (req, res) => {
 }
 
 
-export const getLatestEvent:RequestHandler = async (req,res)=>{
+export const getLatestEvent:ReqRes = async (_,res)=>{
     if(debug) console.log('#getLatestEvent')
     try {
         const result = await Event.find({}).sort({updatedAt:-1}).limit(1)

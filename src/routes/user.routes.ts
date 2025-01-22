@@ -1,7 +1,7 @@
-import { Router } from 'express'
+import { Router } from 'npm:express'
 const router = Router()
 
-import *as usr from '../controllers/user'
+import *as usr from '../controllers/user.ts'
 
 
 router.post('/login', usr.login)

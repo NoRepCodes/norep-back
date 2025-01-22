@@ -1,7 +1,7 @@
-import { Router } from 'express'
+import { Router } from 'npm:express'
 const router = Router()
 
-import *as guest from '../controllers/guest'
+import *as guest from '../controllers/guest.ts'
 
 router.get('/uri', guest.uri)
 router.get('/', guest.test)

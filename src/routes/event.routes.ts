@@ -1,7 +1,7 @@
-import { Router } from 'express'
+import { Router } from 'npm:express'
 const router = Router()
 
-import *as evn from '../controllers/event'
+import *as evn from '../controllers/event.ts'
 
 
 router.post('/createEvent', evn.createEvent)

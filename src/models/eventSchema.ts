@@ -1,5 +1,5 @@
 // const { Schema, model } = require('mongoose')
-import { Schema, model, SchemaTypes } from "mongoose";
+import { Schema, model, SchemaTypes } from "npm:mongoose";
 const objId = SchemaTypes.ObjectId;
 
 // const wodRes = new Schema({
@@ -83,12 +83,12 @@ const EventSchema = new Schema(
   }
 );
 
-function getDec(value: number) {
-  if (typeof value !== "undefined") {
-    return parseFloat(value.toString());
-  }
-  return value;
-}
+// function getDec(value: number) {
+//   if (typeof value !== "undefined") {
+//     return parseFloat(value.toString());
+//   }
+//   return value;
+// }
 /// WODS GUIDE 1=AMRAP 2=FORTIME 3=RM 4=CIRCUIT
 
 // EventSchema.methods.changeName = function () {

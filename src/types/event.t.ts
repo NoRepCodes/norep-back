@@ -1,5 +1,5 @@
 
-import { Types } from 'mongoose'
+import { Types } from 'npm:mongoose'
 
 export type ResultType = {
     _id: string | Types.ObjectId,

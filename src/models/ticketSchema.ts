@@ -1,4 +1,4 @@
-import { Schema, model, SchemaTypes } from 'mongoose'
+import { Schema, model, SchemaTypes } from 'npm:mongoose'
 const objId = SchemaTypes.ObjectId;
 
 const TicketSchema = new Schema({

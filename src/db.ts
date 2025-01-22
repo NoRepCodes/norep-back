@@ -1,17 +1,18 @@
-import { connect,set } from 'mongoose'
-import dotenv from 'dotenv'
-dotenv.config()
+// deno-lint-ignore-file no-explicit-any
+//@ts-ignore idk why this sht doesnt load connect
+import { connect, set } from "npm:mongoose";
+
 const connectDB = async () => {
   try {
+    const uri = Deno.env.get("MONGODB_URI");
+    if (!uri) throw new Error("MONGO DB URI NOT FOUND");
     set("strictQuery", false);
-    await connect(process.env.MONGODB_URI ?? '')
-      .then(db => console.log('Database is connected'))
-      .catch(err => console.log(err))
-
+    await connect(uri)
+      .then(() => console.log("Database is connected"))
+      .catch((err: any) => console.log(err));
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
+};
 
-}
-
-connectDB()
+await connectDB();
