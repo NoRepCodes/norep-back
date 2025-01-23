@@ -7,7 +7,7 @@ const TicketSchema = new Schema({
     category_id: { type: String, required: true },
     users: { type:[objId], ref: "User", required: true },
     phone: { type:String, required: true },
-    name: { type:String, required: true },
+    name: { type:String, required: true,default:'' },
     dues: { type:[{
         secure_url: { type: String, required: true },
         public_id: { type: String, required: true },
