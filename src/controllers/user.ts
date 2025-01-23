@@ -209,6 +209,7 @@ export const registerTicket: RequestHandler = async (req, res) => {
   if (debug) console.log("#registerTicket");
   try {
     const { users, category_id, inputs, image, phone } = req.body;
+    if(users.length === 1) inputs.name = ''
 
     const result: (EventType & Document) | null = await Event.findOne({
       "categories._id": category_id,
