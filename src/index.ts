@@ -1,29 +1,30 @@
-import express from 'express'
-import routeGuest from './routes/guest.routes'
-import routeEvent from './routes/event.routes'
-import routeUser from './routes/user.routes'
+import express from "express";
+import routeGuest from "./routes/guest.routes";
+import routeEvent from "./routes/event.routes";
+import routeUser from "./routes/user.routes";
 //@ts-ignore
-import cors from 'cors'
-import './db'
-const app = express()
+import cors from "cors";
+import db from "./db";
+const app = express();
 
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.json({ limit: '50mb' }));
-app.use(cors({
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(
+  cors({
     origin: "*",
-}));
+  })
+);
 
-
-
-app.use(routeEvent)
-app.use(routeUser)
-app.use(routeGuest)
-
-app.listen(process.env.PORT || 4000, () => {
-    console.log('Server listen on port', 4000)
-})
+app.use(routeEvent);
+app.use(routeUser);
+app.use(routeGuest);
+db().then(() => {
+  app.listen(process.env.PORT || 4000, () => {
+    console.log("Server listen on port", 4000);
+  });
+});
 
 // TO DO ✅ ❌ ⏳ ❓
 /**
- * 
+ *
  */
