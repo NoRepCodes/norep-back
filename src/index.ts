@@ -2,6 +2,7 @@ import express from 'express'
 import routeGuest from './routes/guest.routes'
 import routeEvent from './routes/event.routes'
 import routeUser from './routes/user.routes'
+import routeAdmin from './routes/admin.routes'
 //@ts-ignore
 import cors from 'cors'
 import './db'
@@ -18,6 +19,7 @@ app.use(cors({
 app.use(routeEvent)
 app.use(routeUser)
 app.use(routeGuest)
+app.use(routeAdmin)
 
 app.listen(process.env.PORT || 4000, () => {
     console.log('Server listen on port', 4000)

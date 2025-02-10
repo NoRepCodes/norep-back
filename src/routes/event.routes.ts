@@ -14,4 +14,5 @@ router.post('/updateTeams', evn.updateTeams)
 
 router.post('/toggleUpdating', evn.toggleUpdating)
 
+
 export default router

@@ -9,8 +9,15 @@ router.get('/getEvents', guest.getEvents)
 router.get('/getEventPlusWods', guest.getEventPlusWods)
 router.get('/getLatestEvent', guest.getLatestEvent)
 
+router.get('/getEventTable', guest.getEventTable)
+
+router.get('/getEmailExist', guest.getEmailExist)
+router.post('/changePassword', guest.changePassword)
+
 router.post('/getWods', guest.getWods)
-router.post('/cleanDupl', guest.cleanDupl)
+router.post('/eventsWithInfo', guest.eventsWithInfo)
+
+// router.post('/cleanDupl', guest.cleanDupl)
 
 export default router
 // XRH7J5O2OZJ6T1EGNTONG8PG30PIXJJA

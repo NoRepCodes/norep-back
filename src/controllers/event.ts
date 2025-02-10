@@ -6,123 +6,72 @@ import {
   uploadImages,
 } from "../helpers/uploadImages";
 import { RequestHandler } from "express";
-import Event from "../models/eventSchema";
+import Event, { eventV } from "../models/eventSchema";
 import Wod from "../models/wodSchema";
 import User from "../models/wodSchema";
 // import moment from "moment";
-import { EventType, ResultType, WodType } from "../types/event.t";
+import { CategoryType, EventType, ResultType, WodType } from "../types/event.t";
 import { Types } from "mongoose";
+
+import verifyBody from "../helpers/verifyBody";
+
 const debug = true;
 // EVENTS
 export const createEvent: RequestHandler = async (req, res) => {
-  // if (debug) console.log('#createEvent')
+  if (debug) console.log("#createEvent");
   try {
-    const {
-      name,
-      since,
-      dues,
-      until,
-      place,
-      accesible,
-      secure_url: s_url,
-      categories,
-      partners: pimages,
-      register_time,
-      manual_teams,
-    } = req.body;
+    verifyBody(req.body, eventV);
+    const { secure_url: s_url, partners: pimages, ...bData } = req.body;
     const { secure_url, public_id } = await uploadImage({
       secure_url: s_url,
       public_id: "_",
     });
     const partners = await uploadImages(pimages);
-    await Event.create({
-      name,
-      since,
-      until,
-      place,
-      dues,
-      secure_url,
-      public_id,
-      accesible,
-      categories,
-      partners,
-      register_time,
-      manual_teams,
-    });
-    // res.send(result)
-
-    const results = await Event.find();
-    res.send(results);
-    // console.log(req.body)
-    // res.status(400).json({ msg: 'test' })
+    await Event.create({ ...bData, secure_url, public_id, partners });
+    res.send({ msg: "Evento Creado con exito!" });
   } catch (error: any) {
-    console.log(error);
     res.status(400).json({ msg: error.message });
   }
 };
 
 export const updateEvent: RequestHandler = async (req, res) => {
-  // if (debug) console.log('#updateEvent')
+  if (debug) console.log("#updateEvent");
   try {
+    verifyBody(req.body, eventV);
     const {
       _id,
-      name,
-      since,
-      until,
-      dues,
-      place,
-      accesible,
-      categories,
       secure_url: s_url,
       public_id: p_id,
       partners: pimages,
-      manual_teams,
-      register_time,
+      ...bData
     } = req.body;
 
-    const evnt = await Event.findById(_id);
+    const evnt: EventType = (await Event.findById(_id)).toObject();
     if (evnt === null || evnt === undefined)
       return res.status(400).json({ msg: "Evento no encontrado" });
     let bool = false;
-    categories.forEach((c:any) => {
+    bData.categories.forEach((c: CategoryType) => {
       c._id = new Types.ObjectId(c._id);
-      //@ts-ignore
-      // const i = evnt.categories.findIndex(categ => categ._id.toString() === c._id)
       const categ = evnt.categories.find((categ) => categ._id === c._id);
-      //@ts-ignore
       if (categ && categ?.teams.length !== c.teams?.length) bool = true;
-      //@ts-ignore
       else if (categ && categ?.teams.length === c.teams?.length)
-        //@ts-ignore
         c.teams = [...categ.teams];
     });
     if (bool)
-      return res.status(400).json({
-        msg: "Se ha registrado un equipo nuevo mientras, refrescar la pagina solucionara el problema.",
-      });
+      throw new Error(
+        "Equipos incompatibles, refrescar la pagina solucionara el problema."
+      );
     const { secure_url, public_id } = await uploadImage({
       secure_url: s_url,
       public_id: p_id,
     });
     const partners = await uploadImages(pimages);
-    // console.log(categories)
-
-    evnt.name = name;
-    evnt.since = since;
-    evnt.until = until;
-    evnt.dues = dues;
-    evnt.partners = partners;
-    evnt.place = place;
-    evnt.accesible = accesible;
-    //@ts-ignore
-    evnt.categories = categories;
-    evnt.secure_url = secure_url;
-    evnt.public_id = public_id;
-    evnt.register_time = register_time;
-    evnt.manual_teams = manual_teams;
-    await evnt.save();
-    const results = await Event.find();
-    res.send(results);
+    const result = await Event.findOneAndUpdate(
+      { _id },
+      { ...bData, secure_url, public_id, partners },
+      { new: true }
+    );
+    res.send(result);
 
     // console.log(req.body)
     // res.status(400).json({ msg: 'test' })
@@ -150,7 +99,7 @@ export const deleteEvent: RequestHandler = async (req, res) => {
 
 /// WODS
 export const updateWods: RequestHandler = async (req, res) => {
-  // if (debug) console.log('#namehere')
+  if (debug) console.log("#updateWods");
   try {
     const { wods, toDelete, categories } = req.body;
     const updWod = async (wod: WodType) => {
@@ -174,10 +123,10 @@ export const updateWods: RequestHandler = async (req, res) => {
     //   ...wods.map((w:any) => updWod(w)),
     //   delWods(),
     // ]);
-    for (const w of wods){
-      await updWod(w)
+    for (const w of wods) {
+      await updWod(w);
     }
-    delWods()
+    await delWods();
     const findWods = await Wod.find({
       category_id: { $in: categories },
     });
@@ -188,13 +137,12 @@ export const updateWods: RequestHandler = async (req, res) => {
   }
 };
 
-
 export const updateResults: RequestHandler = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
     const { wod_id, results, categories } = req.body;
 
-    const notExist = results.some((team_res:any) => !team_res.team_id);
+    const notExist = results.some((team_res: any) => !team_res.team_id);
     if (notExist)
       return res.status(404).json({ msg: "Uno de los equipos no existe" });
 
@@ -206,7 +154,6 @@ export const updateResults: RequestHandler = async (req, res) => {
       { new: true }
     );
     const wods = await Wod.find({ category_id: { $in: categories } });
-    // console.log(wods);
     res.send(wods);
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
@@ -216,22 +163,26 @@ export const updateResults: RequestHandler = async (req, res) => {
 export const updateTeams: RequestHandler = async (req, res) => {
   if (debug) console.log("#updateTeams");
   try {
-    const { teams, category_id } = req.body;
-    let aux = [...teams];
-    aux.forEach((team: any, i) => {
+    const { teams, category_id,toDelete } = req.body;
+    // let aux = [...teams];
+    teams.forEach((team: any) => {
       // if(team._id ==='_') aux[i]._id===undefined
       // if(team.captain ==='_') aux[i].captain===undefined
       if (team._id === "_") team._id = undefined;
       if (team.captain === "_") team.captain = undefined;
     });
-    await Event.findOneAndUpdate(
+    const event = await Event.findOneAndUpdate(
       { "categories._id": category_id },
       {
-        "categories.$.teams": aux,
-      }
+        "categories.$.teams": teams,
+      },{new:true}
     );
-    const results = await Event.find();
-    res.send(results);
+
+    await Wod.updateMany({category_id},{
+      $pull:{team:{_id:{$in:toDelete}}}
+    })
+    
+    res.send(event);
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
@@ -241,7 +192,7 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
   if (debug) console.log("#toggleUpdating");
   try {
     const { category_id, state } = req.body;
-    const evn = await Event.findOneAndUpdate(
+    const event = await Event.findOneAndUpdate(
       { "categories._id": category_id },
       {
         "categories.$.updating": state,
@@ -249,8 +200,8 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
       { new: true }
     );
     // console.log(evn);
-    if (evn) {
-      res.send("ok");
+    if (event) {
+      res.send(event);
     } else {
       res.status(400).json({ msg: "Evento no encontrado" });
     }

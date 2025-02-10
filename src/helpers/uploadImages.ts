@@ -28,9 +28,9 @@ const regx = /data:image/;
 // const regx = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
 export const uploadImage: UpImage = async (img) => {
-  const isBase64 = regx.test(img.secure_url);
+  // const isBase64 = regx.test(img.secure_url);
   // if the secure_url is a base64, upload it, if it is a cloudinary url, just return normal values
-  if (isBase64) {
+  if (img.secure_url.length > 100) {
     const { secure_url, public_id } = await cloudinary.uploader.upload(
       img.secure_url,
       {}

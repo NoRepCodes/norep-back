@@ -6,7 +6,7 @@ import {
   uploadImages,
 } from "../helpers/uploadImages";
 import { RequestHandler } from "express";
-import User from "../models/userSchema";
+import User, { userV } from "../models/userSchema";
 import { UserType } from "../types/user.t";
 import moment from "moment";
 import { CategoryType, EventType, TeamType } from "../types/event.t";
@@ -19,20 +19,21 @@ import bcrypt from "bcrypt";
 import Ticket from "../models/ticketSchema";
 //@ts-ignore
 import nodemailer from "nodemailer";
+import verifyBody from "../helpers/verifyBody";
 
 const debug = true;
 
 export const login: RequestHandler = async (req, res) => {
   if (debug) console.log("#login");
   try {
-    const { email, pass } = req.body;
+    const { email, password: pass } = req.body;
     // let a = 's'
     // a.toLowerCase()
     if (email[0] === "@") {
       // const { username, password } = req.body;
       const adm: any = await Admin.findOne({ username: email });
       if (adm) {
-        bcrypt.compare(pass, adm.password).then(function (result:any) {
+        bcrypt.compare(pass, adm.password).then(function (result: any) {
           if (result) {
             res.send({
               username: adm.username,
@@ -44,7 +45,7 @@ export const login: RequestHandler = async (req, res) => {
         });
       }
     } else {
-      const user = await User.findOne({ email:email.toLowerCase() });
+      const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) return res.status(401).json({ msg: "Correo incorrecto" });
       bcrypt.compare(pass, user.password, function (_: any, result: any) {
         if (!result)
@@ -65,7 +66,7 @@ export const registerUser: RequestHandler = async (req, res) => {
   try {
     const {
       name,
-      pass,
+      password: pass,
       email,
       card_id,
       birth,
@@ -75,7 +76,6 @@ export const registerUser: RequestHandler = async (req, res) => {
       shirt,
       phone,
     } = req.body;
-    console.log("something is wird");
     const ifEmail = await User.find({ email: email.toLowerCase() });
     if (ifEmail.length > 0)
       return res.status(403).json({ msg: "Correo en uso" });
@@ -87,7 +87,7 @@ export const registerUser: RequestHandler = async (req, res) => {
       const result = await User.create({
         password,
         name,
-        email:email.toLowerCase(),
+        email: email.toLowerCase(),
         shirt,
         card_id,
         genre,
@@ -167,7 +167,7 @@ export const registerTeam: RequestHandler = async (req, res) => {
   }
 };
 
-export const getUserRedcords: RequestHandler = async (req, res) => {
+export const getUserRecords: RequestHandler = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
     // const filter = {
@@ -184,7 +184,7 @@ export const createAdmin: RequestHandler = async (req, res) => {
   if (debug) console.log("#createAdmin");
   try {
     const { username, pass } = req.body;
-    bcrypt.hash(pass, 7, async (err:any, hash:any) => {
+    bcrypt.hash(pass, 7, async (err: any, hash: any) => {
       // Store hash in your password DB.
       const result = await Admin.create({ username, password: hash });
       res.send(result);
@@ -480,7 +480,7 @@ export const approveTicket: RequestHandler = async (req, res) => {
       // await deleteImage(ticket.public_id);
       await Ticket.findOneAndDelete({ _id: ticket._id });
       const results = await Ticket.find();
-      
+
       let transporter = nodemailer.createTransport({
         service: "yahoo",
         auth: {
@@ -488,17 +488,23 @@ export const approveTicket: RequestHandler = async (req, res) => {
           pass: "lgippxsozkcbrovy",
         },
       });
-  
-      
-      const users = await User.find({ _id: { $in: ticket.users } }, { email: 1 });
-  
+
+      const users = await User.find(
+        { _id: { $in: ticket.users } },
+        { email: 1 }
+      );
+
       users.forEach((user) => {
         let mailOptions = {
           from: "norep.code@yahoo.com",
           to: user.email,
           subject: `Haz sido admitido en el evento ${ticket.event.toUpperCase()}!`,
-          html: emailMsg(ticket.name,ticket.event,ticket.category,event._id.toString()),
-          
+          html: emailMsg(
+            ticket.name,
+            ticket.event,
+            ticket.category,
+            event._id.toString()
+          ),
         };
         transporter.sendMail(mailOptions, (error: any, info: any) => {
           if (error) {
@@ -508,7 +514,7 @@ export const approveTicket: RequestHandler = async (req, res) => {
           }
         });
       });
-      
+
       res.send(results);
     } else res.status(404).json({ msg: "Evento no encontrado." });
   } catch (error: any) {
@@ -542,7 +548,6 @@ export const sendEmail: RequestHandler = async (req, res) => {
       },
     });
 
-    
     const ticket = { users: "66b68416b5a9026a6d13cb4d" };
     const users = await User.find({ _id: { $in: ticket.users } }, { email: 1 });
 
@@ -551,8 +556,12 @@ export const sendEmail: RequestHandler = async (req, res) => {
         from: "norep.code@yahoo.com",
         to: user.email,
         subject: `Haz sido admitido en el evento STRONG ENDURANCE!`,
-        html: emailMsg('los odiosos','strong endurance','avanzado','66b4e80393c333245f375286'),
-        
+        html: emailMsg(
+          "los odiosos",
+          "strong endurance",
+          "avanzado",
+          "66b4e80393c333245f375286"
+        ),
       };
       transporter.sendMail(mailOptions, (error: any, info: any) => {
         if (error) {
@@ -567,6 +576,36 @@ export const sendEmail: RequestHandler = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
+export const getUserInfo: RequestHandler = async (req, res) => {
+  if (debug) console.log("#getUserInfo");
+  try {
+    const { _id } = req.query;
+    const findUser = await User.findById(_id, { password: 0 });
+    if (!findUser) res.status(404).json({ msg: "Usuario no encontrado." });
+    res.send(findUser);
+  } catch (error: any) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+export const updateUserInfo: RequestHandler = async (req, res) => {
+  if (debug) console.log("#updateUserInfo");
+  try {
+    verifyBody(req.body, userV);
+    const { _id, email, ...userData } = req.body;
+    const findUser = await User.findOneAndUpdate(
+      { _id },
+      { email: email.toLowerCase(),...userData },
+      {new:true}
+    );
+    if (!findUser) res.status(404).json({ msg: "Usuario no encontrado." });
+    res.send(findUser);
+    // res.status(400).json({ msg:'wtf' });
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json({ msg: error.message });
+  }
+};
+
 // export const namehere:RequestHandler = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {
@@ -577,8 +616,12 @@ export const sendEmail: RequestHandler = async (req, res) => {
 //
 // }
 
-
-const emailMsg = (team:string,event:string,category:string,event_id:string)=>{
+const emailMsg = (
+  team: string,
+  event: string,
+  category: string,
+  event_id: string
+) => {
   return `<body>
     <div style="width:500px;padding:2em;box-sizing:border-box">
       <h1 style="font-family: sans-serif; font-weight: 600;font-style: normal;color: black;" >${team.toUpperCase()}</h1>
@@ -589,8 +632,8 @@ const emailMsg = (team:string,event:string,category:string,event_id:string)=>{
       <a href="https://www.norep.com.ve/resultados/${event_id}" target="_blank" style="color: black;font-style: normal;font-weight: 600;font-family:  sans-serif;background-color: #F1FF48;border: 1px solid #191919;font-size: 1.3em;padding: .5em 1em;color: #191919;cursor: pointer;text-decoration: none;" href="/" >IR AL EVENTO</a>
     </div>
   </body>
-  `
-}
+  `;
+};
 
 /**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
  

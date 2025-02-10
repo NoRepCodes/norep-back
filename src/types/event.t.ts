@@ -28,7 +28,7 @@ export type TeamType = {
     _id: string | Types.ObjectId,
     users: string[],
     name: string,
-    captain: string,
+    // captain: string,
     // shirt:string,
 }
 
@@ -38,7 +38,7 @@ export type CategoryType = {
     name: string,
     price: boolean,
     updating: boolean,
-    slots: boolean,
+    slots: number,
     filter?: {
         male?: number,
         female?: number,

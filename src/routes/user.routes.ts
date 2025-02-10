@@ -18,7 +18,9 @@ router.post('/pushTicket', usr.pushTicket)
 router.post('/createAdmin', usr.createAdmin)
 router.post('/deleteAdmin', usr.deleteAdmin)
 
-router.get('/getUserRedcords', usr.getUserRedcords)
+router.get('/getUserRecords', usr.getUserRecords)
+router.get('/getUserInfo', usr.getUserInfo)
+router.post('/updateUserInfo', usr.updateUserInfo)
 
 router.get('/sendEmail', usr.sendEmail)
 

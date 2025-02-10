@@ -1,6 +1,7 @@
-import { Schema, model } from 'mongoose'
+import { Schema, model } from "mongoose";
 
-const UserSchema = new Schema({
+const UserSchema = new Schema(
+  {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     shirt: { type: String, required: true },
@@ -8,17 +9,31 @@ const UserSchema = new Schema({
     password: { type: String, required: true },
     card_id: { type: String, required: true },
     phone: { type: String, required: true },
-    genre: { type: String, enum: ['Masculino', 'Femenino'], required: true },
+    genre: { type: String, enum: ["Masculino", "Femenino"], required: true },
     location: {
-        country: { type: String, required: true },
-        state: { type: String, required: true },
-        city: { type: String, required: true },
+      country: { type: String, required: true },
+      state: { type: String, required: true },
+      city: { type: String, required: true },
     },
     box: String,
-},
-    {
-        timestamps: true,
-    }
+  },
+  {
+    timestamps: true,
+  }
 );
 
-export default model('User', UserSchema)
+export const userV = [
+  "_id",
+  "name",
+  "password",
+  "email",
+  "card_id",
+  "birth",
+  "box",
+  "genre",
+  "location",
+  "shirt",
+  "phone",
+];
+
+export default model("User", UserSchema);
