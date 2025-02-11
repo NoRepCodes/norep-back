@@ -314,11 +314,11 @@ export const checkUsers: RequestHandler = async (req, res) => {
 
     let age_max = amax
       ? new Date(
-          `${2024 - amax}-${new Date().getMonth()}-${new Date().getDay()}`
+          `${2025 - amax}-${new Date().getMonth()}-${new Date().getDay()}`
         )
       : undefined;
     let age_min = am
-      ? new Date(`${2024 - am}-${new Date().getMonth()}-${new Date().getDay()}`)
+      ? new Date(`${2025 - am}-${new Date().getMonth()}-${new Date().getDay()}`)
       : undefined;
 
     let users_id = [captain._id];
