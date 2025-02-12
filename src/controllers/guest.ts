@@ -13,26 +13,9 @@ import Admin from "../models/adminSchema";
 dotenv.config();
 const debug = false;
 
-//$2b$10$YIl/HIE6qH8xNC0pj5zEk.75f17UAS1dGArA0xUNqU6fUHBcp8Pye
 export const uri: RequestHandler = async (req, res) => {
   if (debug) console.log("#test");
-
-    let password = bcrypt.hashSync('27378819', bcrypt.genSaltSync(10));
-    console.log(password);
-  /**{
-        'categories.name':1,
-        'categories.teams':[{
-            name:1,
-            users:[{}],
-        }],
-    } */
-  // const ev = await Event.find(
-  //   { _id: "678f0ae60a3e3d5d3ef56586" },
-  //   {
-  //     "categories.name": 1,
-  //     "categories.teams": 1,
-  //   }
-  // ).populate("categories.teams.users", "name");
+;
   res.send('ok');
 };
 export const test: RequestHandler = async (req, res) => {
