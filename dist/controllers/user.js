@@ -240,7 +240,8 @@ const registerTicket = (req, res) => __awaiter(void 0, void 0, void 0, function*
     if (debug)
         console.log("#registerTicket");
     try {
-        const { users, category_id, inputs, image, phone } = req.body;
+        const { users, values } = req.body;
+        const { category_id, name, dues, phone } = values;
         const result = yield eventSchema_1.default.findOne({
             "categories._id": category_id,
         });
@@ -252,7 +253,7 @@ const registerTicket = (req, res) => __awaiter(void 0, void 0, void 0, function*
             result.categories[cindex].teams.length) {
             return res.status(403).json({ msg: "Límite de equipos alcanzado" });
         }
-        if (result.categories[cindex].teams.some((t) => t.name === inputs.name)) {
+        if (result.categories[cindex].teams.some((t) => t.name === name)) {
             return res
                 .status(403)
                 .json({ msg: `El nombre del equipo ya está en uso` });
@@ -280,7 +281,7 @@ const registerTicket = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 });
         }
         const { secure_url, public_id } = yield (0, uploadImages_1.uploadImage)({
-            secure_url: image,
+            secure_url: dues[0].secure_url,
             public_id: "_",
         });
         const ev = yield eventSchema_1.default.findOneAndUpdate({
@@ -294,15 +295,15 @@ const registerTicket = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 users,
                 captain: users[0],
                 phone,
-                name: inputs.name,
+                name,
                 dues: [
                     {
                         // secure_url: "asd",
                         // public_id: "asd",
                         secure_url,
                         public_id,
-                        transf: inputs.transf,
-                        payDues: inputs.payDues,
+                        transf: dues[0].transf,
+                        payDues: dues[0].payDues,
                     },
                 ],
                 duesLimit: ev.dues,
@@ -328,13 +329,13 @@ const checkUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const { captain, card_2, card_3, card_4, category } = req.body;
         let auxFem = 0;
         let auxMal = 0;
-        let am = (_a = category.filter) === null || _a === void 0 ? void 0 : _a.age_min;
+        let amin = (_a = category.filter) === null || _a === void 0 ? void 0 : _a.age_min;
         let amax = (_b = category.filter) === null || _b === void 0 ? void 0 : _b.age_max;
         let age_max = amax
-            ? new Date(`${2024 - amax}-${new Date().getMonth()}-${new Date().getDay()}`)
+            ? new Date(`${2025 - amax}-${new Date().getMonth()}-${new Date().getDay()}`)
             : undefined;
-        let age_min = am
-            ? new Date(`${2024 - am}-${new Date().getMonth()}-${new Date().getDay()}`)
+        let age_min = amin
+            ? new Date(`${2025 - amin}-${new Date().getMonth()}-${new Date().getDay()}`)
             : undefined;
         let users_id = [captain._id];
         if (captain) {
@@ -459,7 +460,7 @@ const getTickets = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     if (debug)
         console.log("#getTickets");
     try {
-        const results = yield ticketSchema_1.default.find().populate("users", "name");
+        const results = yield ticketSchema_1.default.find().populate("users", "name card_id");
         res.send(results);
     }
     catch (error) {

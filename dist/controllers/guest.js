@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eventsWithInfo = exports.changePassword = exports.getEmailExist = exports.getEventTable = exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventPlusWods = exports.getEventsPlusTeams = exports.getEvents = exports.test = exports.uri = void 0;
+exports.eventsWithInfo = exports.changePassword = exports.getEmailExist = exports.getEventTable = exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventPlusWods = exports.getEventsPlusTeams = exports.getEvents = exports.version = exports.test = exports.uri = void 0;
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
 const userSchema_1 = __importDefault(require("../models/userSchema"));
 const t_1 = __importDefault(require("../models/t"));
@@ -57,6 +57,19 @@ const test = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send(process.env.MONGODB_URI);
 });
 exports.test = test;
+const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { cacheAdmin, cacheUser } = req.body;
+        const version = '4.0.0';
+        const user = cacheUser ? yield userSchema_1.default.findById(cacheUser, { password: 0 }) : undefined;
+        const admin = cacheAdmin ? yield adminSchema_1.default.findById(cacheAdmin, { password: 0 }) : undefined;
+        res.send({ version, user, admin });
+    }
+    catch (error) {
+        res.status(400).json({ msg: error.message });
+    }
+});
+exports.version = version;
 const getEvents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#getEvents");
@@ -210,14 +223,15 @@ const getEventTable = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const { _id } = req.query;
         // const event: EventType = await Event.findById(_id).populate('categories.teams.users','name phone card_id');
-        const event = yield eventSchema_1.default.findById(_id);
+        const event = yield eventSchema_1.default.findById(_id).populate("categories.teams.users", 'name card_id');
         if (event === undefined)
             res.status(404).json({ msg: "Evento no encontrado" });
         else {
+            //@ts-ignore
             let categories = event.categories.map((c) => c._id);
             const wods = yield wodSchema_1.default.find({ category_id: { $in: categories } });
             // let data = [events, +moment()]
-            res.send({ event, wods });
+            res.send({ event, wods, date: new Date() });
         }
     }
     catch (error) {

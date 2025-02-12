@@ -17,6 +17,7 @@ router.post('/changePassword', guest.changePassword)
 router.post('/getWods', guest.getWods)
 router.post('/eventsWithInfo', guest.eventsWithInfo)
 
+router.post('/version', guest.version)
 // router.post('/cleanDupl', guest.cleanDupl)
 
 export default router

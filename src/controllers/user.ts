@@ -208,7 +208,8 @@ export const deleteAdmin: RequestHandler = async (req, res) => {
 export const registerTicket: RequestHandler = async (req, res) => {
   if (debug) console.log("#registerTicket");
   try {
-    const { users, category_id, inputs, image, phone } = req.body;
+    const { users, values } = req.body;
+    const {category_id,name,dues,phone} = values
 
     const result: (EventType & Document) | null = await Event.findOne({
       "categories._id": category_id,
@@ -227,7 +228,7 @@ export const registerTicket: RequestHandler = async (req, res) => {
       return res.status(403).json({ msg: "Límite de equipos alcanzado" });
     }
 
-    if (result.categories[cindex].teams.some((t) => t.name === inputs.name)) {
+    if (result.categories[cindex].teams.some((t) => t.name === name)) {
       return res
         .status(403)
         .json({ msg: `El nombre del equipo ya está en uso` });
@@ -257,7 +258,7 @@ export const registerTicket: RequestHandler = async (req, res) => {
     }
 
     const { secure_url, public_id } = await uploadImage({
-      secure_url: image,
+      secure_url: dues[0].secure_url,
       public_id: "_",
     });
     const ev = await Event.findOneAndUpdate(
@@ -275,15 +276,15 @@ export const registerTicket: RequestHandler = async (req, res) => {
         users,
         captain: users[0],
         phone,
-        name: inputs.name,
+        name,
         dues: [
           {
             // secure_url: "asd",
             // public_id: "asd",
             secure_url,
             public_id,
-            transf: inputs.transf,
-            payDues: inputs.payDues,
+            transf: dues[0].transf,
+            payDues: dues[0].payDues,
           },
         ],
         duesLimit: ev.dues,
@@ -306,16 +307,16 @@ export const checkUsers: RequestHandler = async (req, res) => {
     const { captain, card_2, card_3, card_4, category } = req.body;
     let auxFem = 0;
     let auxMal = 0;
-    let am = category.filter?.age_min;
+    let amin = category.filter?.age_min;
     let amax = category.filter?.age_max;
 
     let age_max = amax
       ? new Date(
-          `${2024 - amax}-${new Date().getMonth()}-${new Date().getDay()}`
+          `${2025 - amax}-${new Date().getMonth()}-${new Date().getDay()}`
         )
       : undefined;
-    let age_min = am
-      ? new Date(`${2024 - am}-${new Date().getMonth()}-${new Date().getDay()}`)
+    let age_min = amin
+      ? new Date(`${2025 - amin}-${new Date().getMonth()}-${new Date().getDay()}`)
       : undefined;
 
     let users_id = [captain._id];
@@ -425,7 +426,7 @@ export const checkUsers: RequestHandler = async (req, res) => {
 export const getTickets: RequestHandler = async (req, res) => {
   if (debug) console.log("#getTickets");
   try {
-    const results = await Ticket.find().populate("users", "name");
+    const results = await Ticket.find().populate("users", "name card_id");
     res.send(results);
   } catch (error: any) {
     res.status(400).json({ msg: error.message });

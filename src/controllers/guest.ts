@@ -44,6 +44,19 @@ export const test: RequestHandler = async (req, res) => {
   res.send(process.env.MONGODB_URI);
 };
 
+export const version:RequestHandler = async (req,res)=>{
+  try {
+    const {cacheAdmin,cacheUser} = req.body
+    const version = '4.0.0'
+    const user = cacheUser ? await User.findById(cacheUser,{password:0}) :undefined
+    const admin = cacheAdmin ? await Admin.findById(cacheAdmin,{password:0}) :undefined
+    
+    res.send({version,user,admin})
+  } catch (error) {
+    res.status(400).json({ msg: error.message });
+  }
+}
+
 export const getEvents: RequestHandler = async (req, res) => {
   if (debug) console.log("#getEvents");
   try {
@@ -188,14 +201,15 @@ export const getEventTable: RequestHandler = async (req, res) => {
     const { _id } = req.query;
 
     // const event: EventType = await Event.findById(_id).populate('categories.teams.users','name phone card_id');
-    const event: EventType = await Event.findById(_id);
+    const event = await Event.findById(_id).populate("categories.teams.users", 'name card_id');
     if (event === undefined)
       res.status(404).json({ msg: "Evento no encontrado" });
     else {
+      //@ts-ignore
       let categories = event.categories.map((c) => c._id);
       const wods = await Wod.find({ category_id: { $in: categories } });
       // let data = [events, +moment()]
-      res.send({ event, wods });
+      res.send({ event, wods,date:new Date() });
     }
   } catch (error) {
     res.status(400).json({ msg: error.message });
