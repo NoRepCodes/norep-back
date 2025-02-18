@@ -217,6 +217,8 @@ const registerTicket = (req, res) => __awaiter(void 0, void 0, void 0, function*
         console.log("#registerTicket");
     try {
         const { users, category_id, inputs, image, phone } = req.body;
+        if(!inputs.transf) return res.status(404).json({ msg: "Numero de transferencia requerido" });
+        if(!inputs.inputs.payDues) return res.status(404).json({ msg: "Numero de cuota requerido" });
         const result = yield eventSchema_1.default.findOne({
             "categories._id": category_id,
         });
