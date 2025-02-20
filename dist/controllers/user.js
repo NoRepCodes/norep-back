@@ -502,7 +502,7 @@ const approveTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 service: "yahoo",
                 auth: {
                     user: "norep.code@yahoo.com",
-                    pass: "lgippxsozkcbrovy",
+                    pass: "uqaxzwlvmbcwnpqi",
                 },
             });
             const users = yield userSchema_1.default.find({ _id: { $in: ticket.users } }, { email: 1 });
