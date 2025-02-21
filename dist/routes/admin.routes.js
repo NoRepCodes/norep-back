@@ -24,11 +24,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const router = (0, express_1.Router)();
 const adm = __importStar(require("../controllers/admin"));
+const router = (0, express_1.Router)();
 router.get('/getTeamInfo', adm.getTeamInfo);
 router.post('/updateTeamInfo', adm.updateTeamInfo);
 router.post('/loginAdmin', adm.loginAdmin);
 router.get('/getAllEventUsers', adm.getAllEventUsers);
+router.post('/getTickets', adm.getTickets);
+router.post('/approveTicket', adm.approveTicket);
+router.post('/rejectTicket', adm.rejectTicket);
+router.get('/getUserInfo', adm.getUserInfo);
 exports.default = router;
 //# sourceMappingURL=admin.routes.js.map

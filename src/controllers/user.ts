@@ -23,89 +23,6 @@ import verifyBody from "../helpers/verifyBody";
 
 const debug = true;
 
-export const login: RequestHandler = async (req, res) => {
-  if (debug) console.log("#login");
-  try {
-    const { email, password: pass } = req.body;
-    // let a = 's'
-    // a.toLowerCase()
-    if (email[0] === "@") {
-      // const { username, password } = req.body;
-      const adm: any = await Admin.findOne({ username: email });
-      if (adm) {
-        bcrypt.compare(pass, adm.password).then(function (result: any) {
-          if (result) {
-            res.send({
-              username: adm.username,
-              _id: adm._id,
-            });
-          } else {
-            res.status(404).json({ msg: "Usuario o contraseña incorrectos" });
-          }
-        });
-      }
-    } else {
-      const user = await User.findOne({ email: email.toLowerCase() });
-      if (!user) return res.status(401).json({ msg: "Correo incorrecto" });
-      bcrypt.compare(pass, user.password, function (_: any, result: any) {
-        if (!result)
-          return res.status(401).json({ msg: "Contraseña incorrecta" });
-        //@ts-ignore
-        const { passsword: _x, ...allData } = user;
-        //@ts-ignore
-        return res.send(allData._doc);
-      });
-    }
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
-
-export const registerUser: RequestHandler = async (req, res) => {
-  if (debug) console.log("#register");
-  try {
-    const {
-      name,
-      password: pass,
-      email,
-      card_id,
-      birth,
-      box,
-      genre,
-      location,
-      shirt,
-      phone,
-    } = req.body;
-    const ifEmail = await User.find({ email: email.toLowerCase() });
-    if (ifEmail.length > 0)
-      return res.status(403).json({ msg: "Correo en uso" });
-    const ifCard = await User.find({ card_id: card_id });
-    if (ifCard.length > 0)
-      return res.status(403).json({ msg: "Cédula en uso" });
-    else {
-      let password = bcrypt.hashSync(pass, bcrypt.genSaltSync(10));
-      const result = await User.create({
-        password,
-        name,
-        email: email.toLowerCase(),
-        shirt,
-        card_id,
-        genre,
-        location,
-        box,
-        birth,
-        phone,
-        // birth: moment(new Date(birth)).unix(),
-      });
-      const { password: _, ...allData } = result;
-      //@ts-ignore
-      res.send(allData._doc);
-    }
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
-
 export const registerTeam: RequestHandler = async (req, res) => {
   // if(debug) console.log('#namehere')
   try {
@@ -209,7 +126,7 @@ export const registerTicket: RequestHandler = async (req, res) => {
   if (debug) console.log("#registerTicket");
   try {
     const { users, values } = req.body;
-    const {category_id,name,dues,phone} = values
+    const { category_id, name, dues, phone } = values;
 
     const result: (EventType & Document) | null = await Event.findOne({
       "categories._id": category_id,
@@ -316,7 +233,9 @@ export const checkUsers: RequestHandler = async (req, res) => {
         )
       : undefined;
     let age_min = amin
-      ? new Date(`${2025 - amin}-${new Date().getMonth()}-${new Date().getDay()}`)
+      ? new Date(
+          `${2025 - amin}-${new Date().getMonth()}-${new Date().getDay()}`
+        )
       : undefined;
 
     let users_id = [captain._id];
@@ -423,120 +342,6 @@ export const checkUsers: RequestHandler = async (req, res) => {
   }
 };
 
-export const getTickets: RequestHandler = async (req, res) => {
-  if (debug) console.log("#getTickets");
-  try {
-    const results = await Ticket.find().populate("users", "name card_id");
-    res.send(results);
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
-
-export const pushTicket: RequestHandler = async (req, res) => {
-  if (debug) console.log("#pushTicket");
-  try {
-    const { captain_id, transf, payDues, img } = req.body;
-    const ticket = await Ticket.findOne({ users: captain_id });
-    if (ticket) {
-      const { secure_url, public_id } = await uploadImage({
-        secure_url: img,
-        public_id: "_",
-      });
-      // console.log(secure_url, public_id);
-      ticket.dues.push({
-        secure_url,
-        public_id,
-        transf,
-        payDues,
-      });
-      await ticket.save();
-      res.send("ok");
-    } else {
-      res.status(404).json({ msg: "No se ha encontrado un pago anterior." });
-    }
-    // res.send("ok");
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
-
-export const approveTicket: RequestHandler = async (req, res) => {
-  if (debug) console.log("#approveTicket");
-  try {
-    const { ticket } = req.body;
-    const event = await Event.findOneAndUpdate(
-      { "categories._id": ticket.category_id },
-      {
-        $push: {
-          "categories.$.teams": {
-            users: ticket.users,
-            captain: ticket.users[0],
-            name: ticket.name,
-          },
-        },
-      }
-    );
-    if (event) {
-      // await deleteImage(ticket.public_id);
-      await Ticket.findOneAndDelete({ _id: ticket._id });
-      const results = await Ticket.find();
-
-      let transporter = nodemailer.createTransport({
-        service: "yahoo",
-        auth: {
-          user: "norep.code@yahoo.com",
-          pass: "lgippxsozkcbrovy",
-        },
-      });
-
-      const users = await User.find(
-        { _id: { $in: ticket.users } },
-        { email: 1 }
-      );
-
-      users.forEach((user) => {
-        let mailOptions = {
-          from: "norep.code@yahoo.com",
-          to: user.email,
-          subject: `Haz sido admitido en el evento ${ticket.event.toUpperCase()}!`,
-          html: emailMsg(
-            ticket.name,
-            ticket.event,
-            ticket.category,
-            event._id.toString()
-          ),
-        };
-        transporter.sendMail(mailOptions, (error: any, info: any) => {
-          if (error) {
-            console.log(error);
-          } else {
-            console.log("Email sent: " + info.response);
-          }
-        });
-      });
-
-      res.send(results);
-    } else res.status(404).json({ msg: "Evento no encontrado." });
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
-export const rejectTicket: RequestHandler = async (req, res) => {
-  if (debug) console.log("#rejectTicket");
-  try {
-    const { ticket } = req.body;
-    const result = await Ticket.findOneAndDelete({ _id: ticket._id });
-    if (result) {
-      // await deleteImage(ticket.public_id);
-      const results = await Ticket.find();
-      res.send(results);
-    } else res.status(404).json({ msg: "Ticket no encontrado." });
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
-
 export const sendEmail: RequestHandler = async (req, res) => {
   if (debug) console.log("#sendEmail");
   try {
@@ -577,17 +382,6 @@ export const sendEmail: RequestHandler = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
-export const getUserInfo: RequestHandler = async (req, res) => {
-  if (debug) console.log("#getUserInfo");
-  try {
-    const { _id } = req.query;
-    const findUser = await User.findById(_id, { password: 0 });
-    if (!findUser) res.status(404).json({ msg: "Usuario no encontrado." });
-    res.send(findUser);
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
 export const updateUserInfo: RequestHandler = async (req, res) => {
   if (debug) console.log("#updateUserInfo");
   try {
@@ -595,14 +389,42 @@ export const updateUserInfo: RequestHandler = async (req, res) => {
     const { _id, email, ...userData } = req.body;
     const findUser = await User.findOneAndUpdate(
       { _id },
-      { email: email.toLowerCase(),...userData },
-      {new:true}
+      { email: email.toLowerCase(), ...userData },
+      { new: true }
     );
     if (!findUser) res.status(404).json({ msg: "Usuario no encontrado." });
     res.send(findUser);
     // res.status(400).json({ msg:'wtf' });
   } catch (error: any) {
     console.log(error);
+    res.status(400).json({ msg: error.message });
+  }
+};
+
+export const pushTicket: RequestHandler = async (req, res) => {
+  if (debug) console.log("#pushTicket");
+  try {
+    const { captain_id, transf, payDues, img } = req.body;
+    const ticket = await Ticket.findOne({ users: captain_id });
+    if (ticket) {
+      const { secure_url, public_id } = await uploadImage({
+        secure_url: img,
+        public_id: "_",
+      });
+      // console.log(secure_url, public_id);
+      ticket.dues.push({
+        secure_url,
+        public_id,
+        transf,
+        payDues,
+      });
+      await ticket.save();
+      res.send("ok");
+    } else {
+      res.status(404).json({ msg: "No se ha encontrado un pago anterior." });
+    }
+    // res.send("ok");
+  } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
 };
@@ -616,6 +438,15 @@ export const updateUserInfo: RequestHandler = async (req, res) => {
 //     }
 //
 // }
+
+
+/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
+ 
+Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
+  
+En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
+*/
+
 
 const emailMsg = (
   team: string,
@@ -635,10 +466,3 @@ const emailMsg = (
   </body>
   `;
 };
-
-/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
- 
-Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
-  
-En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
-*/

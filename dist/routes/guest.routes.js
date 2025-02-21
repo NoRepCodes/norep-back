@@ -29,14 +29,16 @@ const guest = __importStar(require("../controllers/guest"));
 router.get('/uri', guest.uri);
 router.get('/', guest.test);
 router.get('/getEvents', guest.getEvents);
-router.get('/getEventPlusWods', guest.getEventPlusWods);
-router.get('/getLatestEvent', guest.getLatestEvent);
 router.get('/getEventTable', guest.getEventTable);
+router.get('/getLatestEvent', guest.getLatestEvent);
 router.get('/getEmailExist', guest.getEmailExist);
+router.post('/login', guest.login);
+router.post('/registerUser', guest.registerUser);
 router.post('/changePassword', guest.changePassword);
-router.post('/getWods', guest.getWods);
-router.post('/eventsWithInfo', guest.eventsWithInfo);
 router.post('/version', guest.version);
+// router.post('/getWods', guest.getWods)
+// router.post('/eventsWithInfo', guest.eventsWithInfo)
+// router.get('/getEventPlusWods', guest.getEventPlusWods)
 // router.post('/cleanDupl', guest.cleanDupl)
 exports.default = router;
 // XRH7J5O2OZJ6T1EGNTONG8PG30PIXJJA

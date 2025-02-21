@@ -26,20 +26,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const router = (0, express_1.Router)();
 const usr = __importStar(require("../controllers/user"));
-router.post('/login', usr.login);
-router.post('/registerUser', usr.registerUser);
-router.post('/registerTeam', usr.registerTeam);
-router.post('/registerTicket', usr.registerTicket);
-router.post('/checkUsers', usr.checkUsers);
-router.get('/getTickets', usr.getTickets);
-router.post('/approveTicket', usr.approveTicket);
-router.post('/rejectTicket', usr.rejectTicket);
-router.post('/pushTicket', usr.pushTicket);
-router.post('/createAdmin', usr.createAdmin);
-router.post('/deleteAdmin', usr.deleteAdmin);
-router.get('/getUserRecords', usr.getUserRecords);
-router.get('/getUserInfo', usr.getUserInfo);
+// router.post('/registerTeam', usr.registerTeam)
+// router.post('/createAdmin', usr.createAdmin)
+// router.post('/deleteAdmin', usr.deleteAdmin)
+// router.get('/getUserRecords', usr.getUserRecords)
+// router.get('/sendEmail', usr.sendEmail)
 router.post('/updateUserInfo', usr.updateUserInfo);
-router.get('/sendEmail', usr.sendEmail);
+router.post('/checkUsers', usr.checkUsers);
+router.post('/pushTicket', usr.pushTicket);
+router.post('/registerTicket', usr.registerTicket);
 exports.default = router;
 //# sourceMappingURL=user.routes.js.map

@@ -46,7 +46,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserInfo = exports.getUserInfo = exports.sendEmail = exports.rejectTicket = exports.approveTicket = exports.pushTicket = exports.getTickets = exports.checkUsers = exports.registerTicket = exports.deleteAdmin = exports.createAdmin = exports.getUserRecords = exports.registerTeam = exports.registerUser = exports.login = void 0;
+exports.pushTicket = exports.updateUserInfo = exports.sendEmail = exports.checkUsers = exports.registerTicket = exports.deleteAdmin = exports.createAdmin = exports.getUserRecords = exports.registerTeam = void 0;
 const uploadImages_1 = require("../helpers/uploadImages");
 const userSchema_1 = __importStar(require("../models/userSchema"));
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
@@ -59,85 +59,6 @@ const ticketSchema_1 = __importDefault(require("../models/ticketSchema"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const verifyBody_1 = __importDefault(require("../helpers/verifyBody"));
 const debug = true;
-const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#login");
-    try {
-        const { email, password: pass } = req.body;
-        // let a = 's'
-        // a.toLowerCase()
-        if (email[0] === "@") {
-            // const { username, password } = req.body;
-            const adm = yield adminSchema_1.default.findOne({ username: email });
-            if (adm) {
-                bcrypt_1.default.compare(pass, adm.password).then(function (result) {
-                    if (result) {
-                        res.send({
-                            username: adm.username,
-                            _id: adm._id,
-                        });
-                    }
-                    else {
-                        res.status(404).json({ msg: "Usuario o contraseña incorrectos" });
-                    }
-                });
-            }
-        }
-        else {
-            const user = yield userSchema_1.default.findOne({ email: email.toLowerCase() });
-            if (!user)
-                return res.status(401).json({ msg: "Correo incorrecto" });
-            bcrypt_1.default.compare(pass, user.password, function (_, result) {
-                if (!result)
-                    return res.status(401).json({ msg: "Contraseña incorrecta" });
-                //@ts-ignore
-                const { passsword: _x } = user, allData = __rest(user, ["passsword"]);
-                //@ts-ignore
-                return res.send(allData._doc);
-            });
-        }
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.login = login;
-const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#register");
-    try {
-        const { name, password: pass, email, card_id, birth, box, genre, location, shirt, phone, } = req.body;
-        const ifEmail = yield userSchema_1.default.find({ email: email.toLowerCase() });
-        if (ifEmail.length > 0)
-            return res.status(403).json({ msg: "Correo en uso" });
-        const ifCard = yield userSchema_1.default.find({ card_id: card_id });
-        if (ifCard.length > 0)
-            return res.status(403).json({ msg: "Cédula en uso" });
-        else {
-            let password = bcrypt_1.default.hashSync(pass, bcrypt_1.default.genSaltSync(10));
-            const result = yield userSchema_1.default.create({
-                password,
-                name,
-                email: email.toLowerCase(),
-                shirt,
-                card_id,
-                genre,
-                location,
-                box,
-                birth,
-                phone,
-                // birth: moment(new Date(birth)).unix(),
-            });
-            const { password: _ } = result, allData = __rest(result, ["password"]);
-            //@ts-ignore
-            res.send(allData._doc);
-        }
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.registerUser = registerUser;
 const registerTeam = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     // if(debug) console.log('#namehere')
@@ -456,120 +377,6 @@ const checkUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.checkUsers = checkUsers;
-const getTickets = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#getTickets");
-    try {
-        const results = yield ticketSchema_1.default.find().populate("users", "name card_id");
-        res.send(results);
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.getTickets = getTickets;
-const pushTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#pushTicket");
-    try {
-        const { captain_id, transf, payDues, img } = req.body;
-        const ticket = yield ticketSchema_1.default.findOne({ users: captain_id });
-        if (ticket) {
-            const { secure_url, public_id } = yield (0, uploadImages_1.uploadImage)({
-                secure_url: img,
-                public_id: "_",
-            });
-            // console.log(secure_url, public_id);
-            ticket.dues.push({
-                secure_url,
-                public_id,
-                transf,
-                payDues,
-            });
-            yield ticket.save();
-            res.send("ok");
-        }
-        else {
-            res.status(404).json({ msg: "No se ha encontrado un pago anterior." });
-        }
-        // res.send("ok");
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.pushTicket = pushTicket;
-const approveTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#approveTicket");
-    try {
-        const { ticket } = req.body;
-        const event = yield eventSchema_1.default.findOneAndUpdate({ "categories._id": ticket.category_id }, {
-            $push: {
-                "categories.$.teams": {
-                    users: ticket.users,
-                    captain: ticket.users[0],
-                    name: ticket.name,
-                },
-            },
-        });
-        if (event) {
-            // await deleteImage(ticket.public_id);
-            yield ticketSchema_1.default.findOneAndDelete({ _id: ticket._id });
-            const results = yield ticketSchema_1.default.find();
-            let transporter = nodemailer_1.default.createTransport({
-                service: "yahoo",
-                auth: {
-                    user: "norep.code@yahoo.com",
-                    pass: "lgippxsozkcbrovy",
-                },
-            });
-            const users = yield userSchema_1.default.find({ _id: { $in: ticket.users } }, { email: 1 });
-            users.forEach((user) => {
-                let mailOptions = {
-                    from: "norep.code@yahoo.com",
-                    to: user.email,
-                    subject: `Haz sido admitido en el evento ${ticket.event.toUpperCase()}!`,
-                    html: emailMsg(ticket.name, ticket.event, ticket.category, event._id.toString()),
-                };
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.log(error);
-                    }
-                    else {
-                        console.log("Email sent: " + info.response);
-                    }
-                });
-            });
-            res.send(results);
-        }
-        else
-            res.status(404).json({ msg: "Evento no encontrado." });
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.approveTicket = approveTicket;
-const rejectTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#rejectTicket");
-    try {
-        const { ticket } = req.body;
-        const result = yield ticketSchema_1.default.findOneAndDelete({ _id: ticket._id });
-        if (result) {
-            // await deleteImage(ticket.public_id);
-            const results = yield ticketSchema_1.default.find();
-            res.send(results);
-        }
-        else
-            res.status(404).json({ msg: "Ticket no encontrado." });
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.rejectTicket = rejectTicket;
 const sendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#sendEmail");
@@ -607,21 +414,6 @@ const sendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.sendEmail = sendEmail;
-const getUserInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#getUserInfo");
-    try {
-        const { _id } = req.query;
-        const findUser = yield userSchema_1.default.findById(_id, { password: 0 });
-        if (!findUser)
-            res.status(404).json({ msg: "Usuario no encontrado." });
-        res.send(findUser);
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.getUserInfo = getUserInfo;
 const updateUserInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#updateUserInfo");
@@ -640,6 +432,37 @@ const updateUserInfo = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.updateUserInfo = updateUserInfo;
+const pushTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (debug)
+        console.log("#pushTicket");
+    try {
+        const { captain_id, transf, payDues, img } = req.body;
+        const ticket = yield ticketSchema_1.default.findOne({ users: captain_id });
+        if (ticket) {
+            const { secure_url, public_id } = yield (0, uploadImages_1.uploadImage)({
+                secure_url: img,
+                public_id: "_",
+            });
+            // console.log(secure_url, public_id);
+            ticket.dues.push({
+                secure_url,
+                public_id,
+                transf,
+                payDues,
+            });
+            yield ticket.save();
+            res.send("ok");
+        }
+        else {
+            res.status(404).json({ msg: "No se ha encontrado un pago anterior." });
+        }
+        // res.send("ok");
+    }
+    catch (error) {
+        res.status(400).json({ msg: error.message });
+    }
+});
+exports.pushTicket = pushTicket;
 // export const namehere:RequestHandler = async (req,res)=>{
 //     if(debug) console.log('#namehere')
 //     try {
@@ -649,6 +472,12 @@ exports.updateUserInfo = updateUserInfo;
 //     }
 //
 // }
+/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
+ 
+Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
+  
+En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
+*/
 const emailMsg = (team, event, category, event_id) => {
     return `<body>
     <div style="width:500px;padding:2em;box-sizing:border-box">
@@ -662,10 +491,4 @@ const emailMsg = (team, event, category, event_id) => {
   </body>
   `;
 };
-/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
- 
-Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
-  
-En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
-*/
 //# sourceMappingURL=user.js.map
