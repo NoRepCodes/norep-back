@@ -62,7 +62,7 @@ export const test: RequestHandler = async (req, res) => {
 export const version: RequestHandler = async (req, res) => {
   try {
     const { cacheAdmin, cacheUser } = req.body;
-    const version = "4.0.3";
+    const version = "4.0.5";
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
       : undefined;
