@@ -27,7 +27,7 @@ const express_1 = require("express");
 const router = (0, express_1.Router)();
 const evn = __importStar(require("../controllers/event"));
 router.post('/createEvent', evn.createEvent);
-router.post('/deleteEvent', evn.deleteEvent);
+router.delete('/deleteEvent', evn.deleteEvent);
 router.post('/updateEvent', evn.updateEvent);
 router.post('/updateWods', evn.updateWods);
 router.post('/updateResults', evn.updateResults);

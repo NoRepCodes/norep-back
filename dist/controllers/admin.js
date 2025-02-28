@@ -109,6 +109,10 @@ const loginAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.loginAdmin = loginAdmin;
+const getYear = (date) => {
+    let d = date.split("-");
+    return d[0];
+};
 const getAllEventUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (true)
         console.log("#getAllEventUsers");
@@ -117,7 +121,7 @@ const getAllEventUsers = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const event = yield eventSchema_1.default.findById(_id, {
             "categories.teams": 1,
         })
-            .populate("categories.teams.users", "name phone card_id")
+            .populate("categories.teams.users", "name phone card_id birth")
             .lean();
         if (!event)
             res.status(404).json({ msg: "Evento no encontrado" });

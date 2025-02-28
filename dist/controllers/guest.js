@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eventsWithInfo = exports.changePassword = exports.getEmailExist = exports.getEventTable = exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventPlusWods = exports.getEventsPlusTeams = exports.getEvents = exports.registerUser = exports.login = exports.version = exports.test = exports.uri = void 0;
+exports.eventsWithInfo = exports.changePassword = exports.getEmailExist = exports.getEventTable = exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventsPlusTeams = exports.getEvents = exports.registerUser = exports.login = exports.version = exports.test = exports.uri = void 0;
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
 const userSchema_1 = __importDefault(require("../models/userSchema"));
 const t_1 = __importDefault(require("../models/t"));
@@ -84,7 +84,7 @@ exports.test = test;
 const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cacheAdmin, cacheUser } = req.body;
-        const version = "4.0.0";
+        const version = "4.0.2";
         const user = cacheUser
             ? yield userSchema_1.default.findById(cacheUser, { password: 0 })
             : undefined;
@@ -141,8 +141,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
-// let password = bcrypt.hashSync('27691339', bcrypt.genSaltSync(10));
-// console.log(password);
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#register");
@@ -224,29 +222,6 @@ exports.getEventsPlusTeams = getEventsPlusTeams;
 //         res.status(400).json({ msg: error.message })
 //     }
 // }
-const getEventPlusWods = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#getEventPlusWods");
-    try {
-        const { _id } = req.query;
-        const events = yield eventSchema_1.default.find().lean();
-        // console.log(events)
-        const event = events.find((ev) => ev._id.toString() === _id);
-        if (event === undefined)
-            res.status(404).json({ msg: "Evento no encontrado" });
-        else {
-            let categories = event.categories.map((c) => c._id);
-            const wods = yield wodSchema_1.default.find({ category_id: { $in: categories } });
-            // let data = [events, +moment()]
-            res.send({ events, wods });
-        }
-        // res.send("ok")
-    }
-    catch (error) {
-        res.status(400).json({ msg: error.message });
-    }
-});
-exports.getEventPlusWods = getEventPlusWods;
 const getWods = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#getWods");

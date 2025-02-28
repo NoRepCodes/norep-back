@@ -64,7 +64,7 @@ const createEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             secure_url: s_url,
             public_id: "_",
         });
-        const partners = yield (0, uploadImages_1.uploadImages)(pimages);
+        const partners = yield (0, uploadImages_1.uploadImages)(pimages !== null && pimages !== void 0 ? pimages : []);
         yield eventSchema_1.default.create(Object.assign(Object.assign({}, bData), { secure_url, public_id, partners }));
         res.send({ msg: "Evento Creado con exito!" });
     }
@@ -114,11 +114,11 @@ exports.updateEvent = updateEvent;
 const deleteEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // if (debug) console.log('#deleteEvent')
     try {
-        const { _id, public_id, partners } = req.body;
+        const { _id, public_id } = req.query;
         const result = yield eventSchema_1.default.deleteOne({ _id: _id });
         if (result.deletedCount > 0) {
-            yield (0, uploadImages_1.deleteImage)(public_id);
-            yield (0, uploadImages_1.deleteImages)(partners);
+            yield (0, uploadImages_1.deleteImage)(public_id.toString());
+            // await deleteImages(partners);
             return res.send(result);
         }
         else
@@ -204,7 +204,7 @@ const updateTeams = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             "categories.$.teams": teams,
         }, { new: true });
         yield wodSchema_1.default.updateMany({ category_id }, {
-            $pull: { team: { _id: { $in: toDelete } } }
+            $pull: { team: { _id: { $in: toDelete } } },
         });
         res.send(event);
     }
@@ -234,7 +234,6 @@ const toggleUpdating = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.toggleUpdating = toggleUpdating;
-// export const migration: RequestHandler = async (req, res) => {
 //   if (debug) console.log("#migration");
 //   try {
 //     const user = await User.find();
@@ -249,15 +248,5 @@ exports.toggleUpdating = toggleUpdating;
 //         res.send('ok')
 //     } catch (error:any) {
 //         res.status(400).json({ msg: error.message })
-//     }
-//
-// export const namehere:RequestHandler = async (req,res)=>{
-//     if(debug) console.log('#namehere')
-//     try {
-//         res.send('ok')
-//     } catch (error:any) {
-//         res.status(400).json({ msg: error.message })
-//     }
-//
-// }
+//     }}
 //# sourceMappingURL=event.js.map

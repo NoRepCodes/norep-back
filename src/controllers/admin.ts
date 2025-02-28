@@ -86,6 +86,10 @@ export const loginAdmin: RequestHandler = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
+const getYear = (date: string) => {
+  let d = date.split("-");
+  return d[0];
+};
 export const getAllEventUsers: RequestHandler = async (req, res) => {
   if (true) console.log("#getAllEventUsers");
   try {
@@ -93,7 +97,7 @@ export const getAllEventUsers: RequestHandler = async (req, res) => {
     const event: EventType = await Event.findById(_id, {
       "categories.teams": 1,
     })
-      .populate("categories.teams.users", "name phone card_id")
+      .populate("categories.teams.users", "name phone card_id birth")
       .lean();
     if (!event) res.status(404).json({ msg: "Evento no encontrado" });
     const allUsers: any[] = [];
@@ -118,6 +122,7 @@ export const getAllEventUsers: RequestHandler = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
+
 
 export const getTickets: RequestHandler = async (req, res) => {
   if (debug) console.log("#getTickets");

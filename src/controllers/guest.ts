@@ -62,7 +62,7 @@ export const test: RequestHandler = async (req, res) => {
 export const version: RequestHandler = async (req, res) => {
   try {
     const { cacheAdmin, cacheUser } = req.body;
-    const version = "4.0.0";
+    const version = "4.0.2";
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
       : undefined;
@@ -114,8 +114,6 @@ export const login: RequestHandler = async (req, res) => {
   }
 };
 
-// let password = bcrypt.hashSync('27691339', bcrypt.genSaltSync(10));
-// console.log(password);
 export const registerUser: RequestHandler = async (req, res) => {
   if (debug) console.log("#register");
   try {
@@ -201,29 +199,6 @@ export const getEventsPlusTeams: RequestHandler = async (req, res) => {
 //         res.status(400).json({ msg: error.message })
 //     }
 // }
-
-export const getEventPlusWods: RequestHandler = async (req, res) => {
-  if (debug) console.log("#getEventPlusWods");
-  try {
-    const { _id } = req.query;
-    const events: EventType[] = await Event.find().lean();
-    // console.log(events)
-    const event: EventType | undefined = events.find(
-      (ev) => ev._id.toString() === _id
-    );
-    if (event === undefined)
-      res.status(404).json({ msg: "Evento no encontrado" });
-    else {
-      let categories = event.categories.map((c) => c._id);
-      const wods = await Wod.find({ category_id: { $in: categories } });
-      // let data = [events, +moment()]
-      res.send({ events, wods });
-    }
-    // res.send("ok")
-  } catch (error: any) {
-    res.status(400).json({ msg: error.message });
-  }
-};
 
 export const getWods: RequestHandler = async (req, res) => {
   if (debug) console.log("#getWods");

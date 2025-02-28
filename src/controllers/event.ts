@@ -26,7 +26,7 @@ export const createEvent: RequestHandler = async (req, res) => {
       secure_url: s_url,
       public_id: "_",
     });
-    const partners = await uploadImages(pimages);
+    const partners = await uploadImages(pimages??[]);
     await Event.create({ ...bData, secure_url, public_id, partners });
     res.send({ msg: "Evento Creado con exito!" });
   } catch (error: any) {
@@ -84,11 +84,11 @@ export const updateEvent: RequestHandler = async (req, res) => {
 export const deleteEvent: RequestHandler = async (req, res) => {
   // if (debug) console.log('#deleteEvent')
   try {
-    const { _id, public_id, partners } = req.body;
+    const { _id, public_id } = req.query;
     const result = await Event.deleteOne({ _id: _id });
     if (result.deletedCount > 0) {
-      await deleteImage(public_id);
-      await deleteImages(partners);
+      await deleteImage(public_id.toString());
+      // await deleteImages(partners);
       return res.send(result);
     } else return res.status(404).json({ msg: "Evento no encontrado" });
   } catch (error: any) {
@@ -163,7 +163,7 @@ export const updateResults: RequestHandler = async (req, res) => {
 export const updateTeams: RequestHandler = async (req, res) => {
   if (debug) console.log("#updateTeams");
   try {
-    const { teams, category_id,toDelete } = req.body;
+    const { teams, category_id, toDelete } = req.body;
     // let aux = [...teams];
     teams.forEach((team: any) => {
       // if(team._id ==='_') aux[i]._id===undefined
@@ -175,13 +175,17 @@ export const updateTeams: RequestHandler = async (req, res) => {
       { "categories._id": category_id },
       {
         "categories.$.teams": teams,
-      },{new:true}
+      },
+      { new: true }
     );
 
-    await Wod.updateMany({category_id},{
-      $pull:{team:{_id:{$in:toDelete}}}
-    })
-    
+    await Wod.updateMany(
+      { category_id },
+      {
+        $pull: { team: { _id: { $in: toDelete } } },
+      }
+    );
+
     res.send(event);
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
@@ -210,7 +214,7 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
   }
 };
 
-// export const migration: RequestHandler = async (req, res) => {
+
 //   if (debug) console.log("#migration");
 //   try {
 //     const user = await User.find();
@@ -226,14 +230,4 @@ export const toggleUpdating: RequestHandler = async (req, res) => {
 //         res.send('ok')
 //     } catch (error:any) {
 //         res.status(400).json({ msg: error.message })
-//     }
-//
-// export const namehere:RequestHandler = async (req,res)=>{
-//     if(debug) console.log('#namehere')
-//     try {
-//         res.send('ok')
-//     } catch (error:any) {
-//         res.status(400).json({ msg: error.message })
-//     }
-//
-// }
+//     }}

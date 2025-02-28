@@ -5,7 +5,7 @@ import *as evn from '../controllers/event'
 
 
 router.post('/createEvent', evn.createEvent)
-router.post('/deleteEvent', evn.deleteEvent)
+router.delete('/deleteEvent', evn.deleteEvent)
 router.post('/updateEvent', evn.updateEvent)
 
 router.post('/updateWods', evn.updateWods)
