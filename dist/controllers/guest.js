@@ -84,7 +84,7 @@ exports.test = test;
 const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cacheAdmin, cacheUser } = req.body;
-        const version = "4.0.2";
+        const version = "4.0.3";
         const user = cacheUser
             ? yield userSchema_1.default.findById(cacheUser, { password: 0 })
             : undefined;
