@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserInfo = exports.rejectTicket = exports.approveTicket = exports.getTickets = exports.getAllEventUsers = exports.loginAdmin = exports.updateTeamInfo = exports.getTeamInfo = void 0;
+exports.getUserSearch = exports.getUserInfo = exports.rejectTicket = exports.approveTicket = exports.getTickets = exports.getAllEventUsers = exports.loginAdmin = exports.updateTeamInfo = exports.getTeamInfo = void 0;
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
 //@ts-ignore
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -248,6 +248,21 @@ const getUserInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getUserInfo = getUserInfo;
+const getUserSearch = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (debug)
+        console.log("#getUserSearch");
+    try {
+        const { text } = req.query;
+        const findUser = yield userSchema_1.default.find({ $or: [{ name: { $regex: text } }, { card_id: { $regex: text } }] }, { name: 1, card_id: 1, _id: 1, phone: 1 });
+        if (!findUser)
+            res.send({ msg: "Usuario no encontrado." });
+        res.send(findUser);
+    }
+    catch (error) {
+        res.status(400).json({ msg: error.message });
+    }
+});
+exports.getUserSearch = getUserSearch;
 const emailMsg = (team, event, category, event_id) => {
     return `<body>
     <div style="width:500px;padding:2em;box-sizing:border-box">

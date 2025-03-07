@@ -62,7 +62,8 @@ export const test: RequestHandler = async (req, res) => {
 export const version: RequestHandler = async (req, res) => {
   try {
     const { cacheAdmin, cacheUser } = req.body;
-    const version = "4.1.1";
+    const url ='https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G'
+    const version = "4.2.0";
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
       : undefined;
@@ -70,7 +71,7 @@ export const version: RequestHandler = async (req, res) => {
       ? await Admin.findById(cacheAdmin, { password: 0 })
       : undefined;
 
-    res.send({ version, user, admin });
+    res.send({ version, user, admin,url });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
