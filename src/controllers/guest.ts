@@ -63,7 +63,7 @@ export const version: RequestHandler = async (req, res) => {
   try {
     const { cacheAdmin, cacheUser } = req.body;
     const url ='https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G'
-    const version = "4.1.1";
+    const version = "4.2.0";
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
       : undefined;
