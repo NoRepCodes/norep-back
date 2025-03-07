@@ -34,5 +34,6 @@ router.post('/getTickets', adm.getTickets);
 router.post('/approveTicket', adm.approveTicket);
 router.post('/rejectTicket', adm.rejectTicket);
 router.get('/getUserInfo', adm.getUserInfo);
+router.get('/getUserSearch', adm.getUserSearch);
 exports.default = router;
 //# sourceMappingURL=admin.routes.js.map

@@ -84,6 +84,7 @@ exports.test = test;
 const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cacheAdmin, cacheUser } = req.body;
+        const url = 'https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G';
         const version = "4.1.1";
         const user = cacheUser
             ? yield userSchema_1.default.findById(cacheUser, { password: 0 })
@@ -91,7 +92,7 @@ const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const admin = cacheAdmin
             ? yield adminSchema_1.default.findById(cacheAdmin, { password: 0 })
             : undefined;
-        res.send({ version, user, admin });
+        res.send({ version, user, admin, url });
     }
     catch (error) {
         res.status(400).json({ msg: error.message });

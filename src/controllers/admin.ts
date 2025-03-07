@@ -123,7 +123,6 @@ export const getAllEventUsers: RequestHandler = async (req, res) => {
   }
 };
 
-
 export const getTickets: RequestHandler = async (req, res) => {
   if (debug) console.log("#getTickets");
   try {
@@ -214,7 +213,6 @@ export const rejectTicket: RequestHandler = async (req, res) => {
   }
 };
 
-
 export const getUserInfo: RequestHandler = async (req, res) => {
   if (debug) console.log("#getUserInfo");
   try {
@@ -226,6 +224,22 @@ export const getUserInfo: RequestHandler = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
+
+export const getUserSearch: RequestHandler = async (req, res) => {
+  if (debug) console.log("#getUserSearch");
+  try {
+    const { text } = req.query;
+    const findUser = await User.find(
+      { $or: [{ name: { $regex: text } }, { card_id: { $regex: text } }] },
+      { name: 1, card_id: 1, _id: 1,phone:1 }
+    );
+    if (!findUser) res.send({ msg: "Usuario no encontrado." });
+    res.send(findUser);
+  } catch (error: any) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+
 const emailMsg = (
   team: string,
   event: string,
