@@ -85,7 +85,7 @@ const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cacheAdmin, cacheUser } = req.body;
         const url = 'https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G';
-        const version = "4.2.0";
+        const version = "5.2.0";
         const user = cacheUser
             ? yield userSchema_1.default.findById(cacheUser, { password: 0 })
             : undefined;
