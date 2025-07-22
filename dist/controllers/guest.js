@@ -43,19 +43,17 @@ const uri = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.uri = uri;
 const test = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     if (debug)
         console.log("#test");
-    const resend = new dist_1.Resend((_a = process.env.RESEND_API_KEY) !== null && _a !== void 0 ? _a : "");
-    const { data, error } = yield resend.emails.send({
-        from: "no-reply@norep.com.ve",
-        to: ["radulito19@gmail.com"],
-        subject: "hello world",
-        html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
-    });
-    if (error)
-        console.log(error);
-    console.log(data);
+    // const resend = new Resend(process.env.RESEND_API_KEY ?? "");
+    // const { data, error } = await resend.emails.send({
+    //   from: "no-reply@norep.com.ve",
+    //   to: ["radulito19@gmail.com"],
+    //   subject: "hello world",
+    //   html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
+    // });
+    // if (error) console.log(error);
+    // console.log(data);
     // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
     // res.send('version 2.1.3')
     // res.send(process.env.MONGODB_URI);
@@ -66,7 +64,7 @@ const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cacheAdmin, cacheUser } = req.body;
         const url = "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
-        const version = "4.2.0";
+        const version = "4.3.2";
         const user = cacheUser
             ? yield userSchema_1.default.findById(cacheUser, { password: 0 })
             : undefined;

@@ -22,15 +22,15 @@ export const uri: RequestHandler = async (req, res) => {
 export const test: RequestHandler = async (req, res) => {
   if (debug) console.log("#test");
 
-  const resend = new Resend(process.env.RESEND_API_KEY ?? "");
-  const { data, error } = await resend.emails.send({
-    from: "no-reply@norep.com.ve",
-    to: ["radulito19@gmail.com"],
-    subject: "hello world",
-    html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
-  });
-  if (error) console.log(error);
-  console.log(data);
+  // const resend = new Resend(process.env.RESEND_API_KEY ?? "");
+  // const { data, error } = await resend.emails.send({
+  //   from: "no-reply@norep.com.ve",
+  //   to: ["radulito19@gmail.com"],
+  //   subject: "hello world",
+  //   html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
+  // });
+  // if (error) console.log(error);
+  // console.log(data);
 
   // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
   // res.send('version 2.1.3')
@@ -43,7 +43,7 @@ export const version: RequestHandler = async (req, res) => {
     const { cacheAdmin, cacheUser } = req.body;
     const url =
       "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
-    const version = "4.2.0";
+    const version = "4.3.2";
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
       : undefined;
