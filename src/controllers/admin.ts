@@ -9,7 +9,7 @@ import User from "../models/userSchema";
 //@ts-ignore
 // import nodemailer from "nodemailer";
 
-import { Resend } from "resend/dist";
+import { Resend } from "resend";
 
 const debug = true;
 

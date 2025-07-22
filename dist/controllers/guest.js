@@ -33,7 +33,7 @@ const wodSchema_1 = __importDefault(require("../models/wodSchema"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const adminSchema_1 = __importDefault(require("../models/adminSchema"));
 // import nodemailer from "nodemailer";
-const dist_1 = require("resend/dist");
+const resend_1 = require("resend");
 dotenv_1.default.config();
 const debug = false;
 const uri = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -313,7 +313,7 @@ const getEmailExist = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             throw new Error("Código inexistente");
         const user = yield userSchema_1.default.findOne({ email }, { name: 1, email: 1 });
         if (user) {
-            const resend = new dist_1.Resend((_a = process.env.RESEND_API_KEY) !== null && _a !== void 0 ? _a : "");
+            const resend = new resend_1.Resend((_a = process.env.RESEND_API_KEY) !== null && _a !== void 0 ? _a : "");
             const { error } = yield resend.emails.send({
                 from: "no-reply@norep.com.ve",
                 to: user.email,

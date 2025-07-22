@@ -20,7 +20,7 @@ import Ticket from "../models/ticketSchema";
 //@ts-ignore
 // import nodemailer from "nodemailer";
 import verifyBody from "../helpers/verifyBody";
-import { Resend } from "resend/dist";
+import { Resend } from "resend";
 
 const debug = true;
 

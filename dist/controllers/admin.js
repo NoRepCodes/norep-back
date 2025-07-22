@@ -21,7 +21,7 @@ const ticketSchema_1 = __importDefault(require("../models/ticketSchema"));
 const userSchema_1 = __importDefault(require("../models/userSchema"));
 //@ts-ignore
 // import nodemailer from "nodemailer";
-const dist_1 = require("resend/dist");
+const resend_1 = require("resend");
 const debug = true;
 const getTeamInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
@@ -205,7 +205,7 @@ const approveTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             const results = yield ticketSchema_1.default.find();
             const users = yield userSchema_1.default.find({ _id: { $in: ticket.users } }, { email: 1 });
             const userList = users.map((u) => u.email);
-            const resend = new dist_1.Resend((_a = process.env.API_RESEND) !== null && _a !== void 0 ? _a : "");
+            const resend = new resend_1.Resend((_a = process.env.API_RESEND) !== null && _a !== void 0 ? _a : "");
             const { data, error } = yield resend.emails.send({
                 from: "norep.code@yahoo.com",
                 to: userList,

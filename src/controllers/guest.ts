@@ -9,7 +9,7 @@ import Wod from "../models/wodSchema";
 import bcrypt from "bcrypt";
 import Admin from "../models/adminSchema";
 // import nodemailer from "nodemailer";
-import { Resend } from "resend/dist";
+import { Resend } from "resend";
 
 dotenv.config();
 const debug = false;
