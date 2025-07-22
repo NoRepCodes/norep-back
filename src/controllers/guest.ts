@@ -8,7 +8,8 @@ import Wod from "../models/wodSchema";
 //@ts-ignore
 import bcrypt from "bcrypt";
 import Admin from "../models/adminSchema";
-import nodemailer from "nodemailer";
+// import nodemailer from "nodemailer";
+import { Resend } from "resend/dist";
 
 dotenv.config();
 const debug = false;
@@ -16,42 +17,20 @@ const debug = false;
 export const uri: RequestHandler = async (req, res) => {
   if (debug) console.log("#test");
 
-  // try {
-  //uqaxzwlvmbcwnpqi
-  // let transporter = nodemailer.createTransport({
-  //   service: "yahoo",
-  //   port: 465,
-  //   secure: true,
-  //   auth: {
-  //     user: "norep.code@yahoo.com",
-  //     pass: "uqaxzwlvmbcwnpqi",
-  //   },
-  // });
-  //   const sendPromises = users.map((user) => {
-  //     let mailOptions = {
-  //       from: "norep.code@yahoo.com",
-  //       to: user.email,
-  //       subject: `Haz sido admitido en el evento CHAMPIONSHIP REGIONAL FITGAMES!`,
-  //       html: emailMsg(
-  //         user.name,
-  //         "CHAMPIONSHIP REGIONAL FITGAMES",
-  //         user.category,
-  //         "678f0ae60a3e3d5d3ef56586"
-  //       ),
-  //     };
-  //     return transporter.sendMail(mailOptions);
-  //   });
-  //   const results = await Promise.all(sendPromises);
-  //   res.send(results);
-  // } catch (error) {
-  //   console.log(error.message);
-  //   res.status(400).json({msg:error.message});
-  // }
-
   res.send("ok");
 };
 export const test: RequestHandler = async (req, res) => {
   if (debug) console.log("#test");
+
+  const resend = new Resend(process.env.RESEND_API_KEY ?? "");
+  const { data, error } = await resend.emails.send({
+    from: "no-reply@norep.com.ve",
+    to: ["radulito19@gmail.com"],
+    subject: "hello world",
+    html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
+  });
+  if (error) console.log(error);
+  console.log(data);
 
   // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
   // res.send('version 2.1.3')
@@ -62,7 +41,8 @@ export const test: RequestHandler = async (req, res) => {
 export const version: RequestHandler = async (req, res) => {
   try {
     const { cacheAdmin, cacheUser } = req.body;
-    const url ='https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G'
+    const url =
+      "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
     const version = "4.2.0";
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
@@ -71,7 +51,7 @@ export const version: RequestHandler = async (req, res) => {
       ? await Admin.findById(cacheAdmin, { password: 0 })
       : undefined;
 
-    res.send({ version, user, admin,url });
+    res.send({ version, user, admin, url });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
@@ -307,26 +287,18 @@ export const getEmailExist: RequestHandler = async (req, res) => {
       throw new Error("Código inexistente");
     const user = await User.findOne({ email }, { name: 1, email: 1 });
     if (user) {
-      let transporter = nodemailer.createTransport({
-        service: "yahoo",
-        auth: {
-          user: "norep.code@yahoo.com",
-          pass: "lgippxsozkcbrovy",
-        },
-      });
-      let mailOptions = {
-        from: "norep.code@yahoo.com",
+      const resend = new Resend(process.env.RESEND_API_KEY ?? "");
+      const { error } = await resend.emails.send({
+        from: "no-reply@norep.com.ve",
         to: user.email,
-        subject: `Recuperación de contraseña`,
+        subject: "Recuperación de contraseña",
         html: passEmail(user.name, code),
-      };
-      transporter.sendMail(mailOptions, (error: any, info: any) => {
-        if (error) {
-          throw new Error("No se ha podido enviar el correo.");
-        } else {
-          res.send({ itExist: true });
-        }
       });
+
+      if (error) throw new Error("No se ha podido enviar el correo.");
+      else res.send({ itExist: true });
+
+      
     } else res.status(404).json({ msg: "El correo ingresado no existe." });
   } catch (error) {
     res.status(400).json({ msg: error.message });
@@ -384,215 +356,6 @@ export const eventsWithInfo: RequestHandler = async (req, res) => {
   }
 };
 
-// const emails = [
-//   {
-//     name: "Duplas Novato Masculino",
-//     users: [
-//   {
-//       email: "radulito19@gmail.com",
-//       name: "María al cuadrado",
-//   category: "Duplas Novato Masculino",
-// },
-//       {
-//         email: "raulbritogonz@gmail.com",
-//         name: "Maria y Lorent",
-//       },
-//       {
-//         email: "slyt19@gmail.com",
-//         name: "Maria y Lorentxx",
-//       },
-//     ],
-//   },
-// ];
-
-////////// DONE EMAILS
-// {
-//   email: "mvgallot@gmail.com",
-//   name: "María al cuadrado",
-//   category: "Duplas Novato Femenino",
-// },
-// {
-//   email: "lorentguadalupe@gmail.com",
-//   name: "Maria y Lorent",
-//   category: "Duplas Novato Femenino",
-// },
-// {
-//   email: "mariaslas14@gmail.com",
-//   name: "Maria y Lorent",
-//   category: "Duplas Novato Femenino",
-// },
-// {
-//   email: "jackceliscastro@gmail.com",
-//   name: "CAFé CON RON",
-//   category: "Duplas Novato Femenino",
-// },
-// {
-//   email: "valentinaparra2023@gmail.com",
-//   name: "CAFé CON RON",
-//   category: "Duplas Novato Femenino",
-// },
-// {
-//   email: "wendymontielweffer97@gmail.com",
-//   name: "MOMS POWER",
-//   category: "Duplas Novato Femenino",
-// },
-// {
-//   email: "yorleymarquina44@gmail.com",
-//   name: "MOMS POWER",
-//   category: "Duplas Novato Femenino",
-// },
-// {
-//   email: "guerramoralesjesuslucas@gmail.com",
-//   name: "Los Guaicaipuro",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "roynerjesusrch@gmail.com",
-//   name: "Los Guaicaipuro",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "fjbelisario29@gmail.com",
-//   name: "Titanes",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "torrealbaamado54@gmail.com",
-//   name: "Titanes",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "carlostovarmizzi@gmail.com",
-//   name: "FE!N!",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "victorjuliocorderanava@gmail.com",
-//   name: "FE!N!",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "dmmaury01@gmail.com",
-//   name: "Iron Titans ",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "francisco.diazl0903@gmail.com",
-//   name: "Iron Titans ",
-//   category: "Duplas Novato Masculino",
-// },
-// {
-//   email: "cslbs.rx.010510@gmail.com",
-//   name: "Atenea y Artemisa",
-//   category: "Duplas Escalado Femenino",
-// },
-// {
-//   email: "ariannamedina146@gmail.com",
-//   name: "Atenea y Artemisa",
-//   category: "Duplas Escalado Femenino",
-// },
-// {
-//   email: "paogonzd@gmail.com",
-//   name: "Strong endurance",
-//   category: "Duplas Escalado Femenino",
-// },
-// {
-//   email: "yrevelis25@gmail.com",
-//   name: "Strong endurance",
-//   category: "Duplas Escalado Femenino",
-// },
-// {
-//   email: "marcosliscano.18@gmail.com",
-//   name: "Team Kaizen",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "luchoantequera1@gmail.com",
-//   name: "Team Kaizen",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "jsantosrr1@gmail.com",
-//   name: "Altitude Strong",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "armandochavez290593@gmail.com",
-//   name: "Altitude Strong",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "ojbborjas@gmail.com",
-//   name: "Pichulas",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "dajepave@gmail.com",
-//   name: "Pichulas",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "ejspsalon@gmail.com",
-//   name: "Team Rayo",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "11eduardoparra11@gmail.com",
-//   name: "Team Rayo",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "yoberlanm@gmail.com",
-//   name: "Un atleta y medio",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "derderfit@gmail.com",
-//   name: "Un atleta y medio",
-//   category: "Duplas Escalado Masculino",
-// },
-// {
-//   email: "johaoswla23@gmail.com",
-//   name: "Johana Porras",
-//   category: "Avanzado Femenino",
-// },
-// {
-//   email: "yusefalsafadi20@gmail.com",
-//   name: "Yusef alsafadi",
-//   category: "Avanzado Masculino",
-// },
-// {
-//   email: "melvindavid14@gmail.com",
-//   name: "Melvin BoscánJr",
-//   category: "Avanzado Masculino",
-// },
-// {
-//   email: "s.enmadavid@gmail.com",
-//   name: "Enmanuel sibada ",
-//   category: "Avanzado Masculino",
-// },
-// {
-//   email: "hernandezcrespoluis@gmail.com",
-//   name: "Luis Fernando ",
-//   category: "Avanzado Masculino",
-// },
-// {
-//   email: "darrysjca@gmail.com",
-//   name: "Darrys Contreras ",
-//   category: "Avanzado Masculino",
-// },
-// {
-//   email: "cruz_goyo@hotmail.com",
-//   name: "Cruz Eliezer",
-//   category: "Master +35 Masculino",
-// },
-// {
-//   email: "luisdefx26@gmail.com",
-//   name: "Luis Perales",
-//   category: "RX",
-// },
-
-const users = [];
 const emailMsg = (
   team: string,
   event: string,

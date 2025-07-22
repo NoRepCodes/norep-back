@@ -16,5 +16,6 @@ router.post('/rejectTicket', adm.rejectTicket)
 router.get('/getUserInfo', adm.getUserInfo)
 router.get('/getUserSearch', adm.getUserSearch)
 
+router.post('/userSearchDB', adm.userSearchDB)
 
 export default router

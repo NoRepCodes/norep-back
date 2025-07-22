@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserSearch = exports.getUserInfo = exports.rejectTicket = exports.approveTicket = exports.getTickets = exports.getAllEventUsers = exports.loginAdmin = exports.updateTeamInfo = exports.getTeamInfo = void 0;
+exports.userSearchDB = exports.getUserSearch = exports.getUserInfo = exports.rejectTicket = exports.approveTicket = exports.getTickets = exports.getAllEventUsers = exports.loginAdmin = exports.updateTeamInfo = exports.getTeamInfo = void 0;
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
 //@ts-ignore
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -20,7 +20,8 @@ const adminSchema_1 = __importDefault(require("../models/adminSchema"));
 const ticketSchema_1 = __importDefault(require("../models/ticketSchema"));
 const userSchema_1 = __importDefault(require("../models/userSchema"));
 //@ts-ignore
-const nodemailer_1 = __importDefault(require("nodemailer"));
+// import nodemailer from "nodemailer";
+const dist_1 = require("resend/dist");
 const debug = true;
 const getTeamInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
@@ -29,7 +30,7 @@ const getTeamInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const { _id } = req.query;
         if (!_id)
             throw new Error("Equipo inexistente");
-        const event = yield eventSchema_1.default.findOne({ "categories.teams._id": _id }, { "categories.teams.$": 1 }).populate("categories.teams.users", "name phone card_id");
+        const event = yield eventSchema_1.default.findOne({ "categories.teams._id": _id }, { "categories.teams.$": 1 }).populate("categories.teams.users", "name phone card_id age birth genre");
         if (!event)
             res.status(404).json({ msg: "Equipo no encontrado" });
         //@ts-ignore
@@ -45,7 +46,16 @@ const updateTeamInfo = (req, res) => __awaiter(void 0, void 0, void 0, function*
     if (debug)
         console.log("#updateTeamInfo");
     try {
-        const { team, categoryIdToPush } = req.body;
+        const { team, categoryIdToPush, cards } = req.body;
+        if (cards) {
+            const users = yield userSchema_1.default.find({ card_id: cards }, { _id: 1 });
+            const userList = users.map((u) => u._id);
+            console.log("here?");
+            if (userList.length !== cards.length)
+                throw { message: "Usuario no encontrado" };
+            console.log("or here?");
+            team.users = userList;
+        }
         const event = yield eventSchema_1.default.findOne({
             "categories.teams._id": team._id,
         });
@@ -78,10 +88,22 @@ const updateTeamInfo = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.send({ msg: "Equipo actualizado con exito!" });
     }
     catch (error) {
+        console.log(error);
         res.status(400).json({ msg: error.message });
     }
 });
 exports.updateTeamInfo = updateTeamInfo;
+// export const updateTeamInfo: RequestHandler = async (req,res) =>{
+//   if (debug) console.log("#updateTeamInfo2");
+//   try {
+//     const {categ_id,tname,cards,team_id} = req.body
+//     const users = await User.find({card_id:cards},{_id:1})
+//     const userList = users.map((u)=>u._id)
+//     res.send(userList)
+//   } catch (error: any) {
+//     res.status(400).json({ msg: error.message });
+//   }
+// }
 const loginAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (true)
         console.log("#loginAdmin");
@@ -163,6 +185,7 @@ const getTickets = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.getTickets = getTickets;
 const approveTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     if (debug)
         console.log("#approveTicket");
     try {
@@ -180,30 +203,17 @@ const approveTicket = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             // await deleteImage(ticket.public_id);
             yield ticketSchema_1.default.findOneAndDelete({ _id: ticket._id });
             const results = yield ticketSchema_1.default.find();
-            let transporter = nodemailer_1.default.createTransport({
-                service: "yahoo",
-                auth: {
-                    user: "norep.code@yahoo.com",
-                    pass: "lgippxsozkcbrovy",
-                },
-            });
             const users = yield userSchema_1.default.find({ _id: { $in: ticket.users } }, { email: 1 });
-            users.forEach((user) => {
-                let mailOptions = {
-                    from: "norep.code@yahoo.com",
-                    to: user.email,
-                    subject: `Haz sido admitido en el evento ${ticket.event.toUpperCase()}!`,
-                    html: emailMsg(ticket.name, ticket.event, ticket.category, event._id.toString()),
-                };
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.log(error);
-                    }
-                    else {
-                        console.log("Email sent: " + info.response);
-                    }
-                });
+            const userList = users.map((u) => u.email);
+            const resend = new dist_1.Resend((_a = process.env.API_RESEND) !== null && _a !== void 0 ? _a : "");
+            const { data, error } = yield resend.emails.send({
+                from: "norep.code@yahoo.com",
+                to: userList,
+                subject: "Haz sido aprobado para el evento!!",
+                html: emailMsg(ticket.name, ticket.event, ticket.category, event._id.toString()),
             });
+            if (error)
+                return res.status(400).json({ error });
             res.send(results);
         }
         else
@@ -263,6 +273,48 @@ const getUserSearch = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.getUserSearch = getUserSearch;
+const userSearchDB = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (debug)
+        console.log("#userSearchDB");
+    try {
+        let { text, page, pageSize } = req.body;
+        page = parseInt(page, 10) || 1;
+        pageSize = parseInt(pageSize, 10) || 20;
+        const users = yield userSchema_1.default.aggregate([
+            {
+                $match: {
+                    $or: [{ name: { $regex: text } }, { card_id: { $regex: text } }],
+                },
+            },
+            {
+                $facet: {
+                    metadata: [{ $count: "totalCount" }],
+                    data: [
+                        { $skip: (page - 1) * pageSize },
+                        { $limit: pageSize },
+                        { $project: { _id: 1, name: 1, phone: 1, card_id: 1 } },
+                    ],
+                },
+            },
+        ]);
+        // const findUser = await User.find(
+        //   { $or: [{ name: { $regex: text } }, { card_id: { $regex: text } }] },
+        //   { name: 1, card_id: 1, _id: 1,phone:1 }
+        // );
+        // if (!findUser) res.send({ msg: "Usuario no encontrado." });
+        res.send({
+            totalCount: users[0].metadata[0].totalCount,
+            page,
+            pageSize,
+            reached: (page - 1) * pageSize + users[0].data.length,
+            users: users[0].data,
+        });
+    }
+    catch (error) {
+        res.status(400).json({ msg: error.message });
+    }
+});
+exports.userSearchDB = userSearchDB;
 const emailMsg = (team, event, category, event_id) => {
     return `<body>
     <div style="width:500px;padding:2em;box-sizing:border-box">
