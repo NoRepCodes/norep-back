@@ -11,7 +11,7 @@ import User from "../models/userSchema";
 
 import { Resend } from "resend";
 
-const debug = true;
+const debug = false;
 
 export const getTeamInfo: RequestHandler = async (req, res) => {
   if (debug) console.log("#getTeamInfo");

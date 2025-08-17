@@ -22,7 +22,7 @@ const userSchema_1 = __importDefault(require("../models/userSchema"));
 //@ts-ignore
 // import nodemailer from "nodemailer";
 const resend_1 = require("resend");
-const debug = true;
+const debug = false;
 const getTeamInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#getTeamInfo");
