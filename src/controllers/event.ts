@@ -106,10 +106,10 @@ export const updateWods: RequestHandler = async (req, res) => {
       const query = wod._id
         ? { _id: wod._id }
         : { category_id: wod.category_id, _id: new Types.ObjectId() };
-      const { _id, ...data } = wod;
+      const { _id, results,...data } = wod;
       return await Wod.findOneAndUpdate(
         query,
-        { ...data, $set: { results: [] } },
+        { ...data },
         { new: true, upsert: true }
       ).lean();
     };
@@ -124,7 +124,8 @@ export const updateWods: RequestHandler = async (req, res) => {
     //   delWods(),
     // ]);
     for (const w of wods) {
-      await updWod(w);
+      const r = await updWod(w);
+      console.log(r);
     }
     await delWods();
     const findWods = await Wod.find({
