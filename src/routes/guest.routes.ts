@@ -27,4 +27,3 @@ router.post('/version', guest.version)
 // router.post('/cleanDupl', guest.cleanDupl)
 
 export default router
-// XRH7J5O2OZJ6T1EGNTONG8PG30PIXJJA
