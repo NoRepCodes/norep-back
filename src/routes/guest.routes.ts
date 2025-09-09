@@ -4,8 +4,8 @@ const router = Router()
 import *as guest from '../controllers/guest'
 
 
-router.get('/uri', guest.uri)
-router.get('/', guest.test)
+router.get('/', guest.isOn)
+router.get('/test', guest.test)
 
 router.get('/getEvents', guest.getEvents)
 router.get('/getEventTable', guest.getEventTable)

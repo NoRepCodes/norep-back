@@ -7,8 +7,11 @@ import Admin from "../models/adminSchema";
 import Ticket from "../models/ticketSchema";
 import User from "../models/userSchema";
 //@ts-ignore
-import nodemailer from "nodemailer";
-const debug = true;
+// import nodemailer from "nodemailer";
+
+import { Resend } from "resend";
+
+const debug = false;
 
 export const getTeamInfo: RequestHandler = async (req, res) => {
   if (debug) console.log("#getTeamInfo");
@@ -18,7 +21,7 @@ export const getTeamInfo: RequestHandler = async (req, res) => {
     const event = await Event.findOne(
       { "categories.teams._id": _id },
       { "categories.teams.$": 1 }
-    ).populate("categories.teams.users", "name phone card_id");
+    ).populate("categories.teams.users", "name phone card_id age birth genre");
     if (!event) res.status(404).json({ msg: "Equipo no encontrado" });
     //@ts-ignore
     const team = event.categories[0].teams.find((t) => t._id == _id);
@@ -30,7 +33,18 @@ export const getTeamInfo: RequestHandler = async (req, res) => {
 export const updateTeamInfo: RequestHandler = async (req, res) => {
   if (debug) console.log("#updateTeamInfo");
   try {
-    const { team, categoryIdToPush } = req.body;
+    const { team, categoryIdToPush, cards } = req.body;
+
+    if (cards) {
+      const users = await User.find({ card_id: cards }, { _id: 1 });
+      const userList = users.map((u) => u._id);
+      console.log("here?");
+      if (userList.length !== cards.length)
+        throw { message: "Usuario no encontrado" };
+      console.log("or here?");
+      team.users = userList;
+    }
+
     const event: EventType = await Event.findOne({
       "categories.teams._id": team._id,
     });
@@ -61,9 +75,23 @@ export const updateTeamInfo: RequestHandler = async (req, res) => {
     await event.save();
     res.send({ msg: "Equipo actualizado con exito!" });
   } catch (error: any) {
+    console.log(error);
     res.status(400).json({ msg: error.message });
   }
 };
+
+// export const updateTeamInfo: RequestHandler = async (req,res) =>{
+//   if (debug) console.log("#updateTeamInfo2");
+//   try {
+//     const {categ_id,tname,cards,team_id} = req.body
+//     const users = await User.find({card_id:cards},{_id:1})
+//     const userList = users.map((u)=>u._id)
+
+//     res.send(userList)
+//   } catch (error: any) {
+//     res.status(400).json({ msg: error.message });
+//   }
+// }
 
 export const loginAdmin: RequestHandler = async (req, res) => {
   if (true) console.log("#loginAdmin");
@@ -158,39 +186,28 @@ export const approveTicket: RequestHandler = async (req, res) => {
       await Ticket.findOneAndDelete({ _id: ticket._id });
       const results = await Ticket.find();
 
-      let transporter = nodemailer.createTransport({
-        service: "yahoo",
-        auth: {
-          user: "norep.code@yahoo.com",
-          pass: "lgippxsozkcbrovy",
-        },
-      });
-
       const users = await User.find(
         { _id: { $in: ticket.users } },
         { email: 1 }
       );
 
-      users.forEach((user) => {
-        let mailOptions = {
-          from: "norep.code@yahoo.com",
-          to: user.email,
-          subject: `Haz sido admitido en el evento ${ticket.event.toUpperCase()}!`,
-          html: emailMsg(
+      const userList = users.map((u)=>u.email)
+
+      const resend = new Resend(process.env.API_RESEND ?? "");
+      const { data, error } = await resend.emails.send({
+        from: "norep.code@yahoo.com",
+        to: userList,
+        subject: "Haz sido aprobado para el evento!!",
+        html: emailMsg(
             ticket.name,
             ticket.event,
             ticket.category,
             event._id.toString()
           ),
-        };
-        transporter.sendMail(mailOptions, (error: any, info: any) => {
-          if (error) {
-            console.log(error);
-          } else {
-            console.log("Email sent: " + info.response);
-          }
-        });
       });
+
+      if (error) return res.status(400).json({ error });
+
 
       res.send(results);
     } else res.status(404).json({ msg: "Evento no encontrado." });
@@ -231,10 +248,52 @@ export const getUserSearch: RequestHandler = async (req, res) => {
     const { text } = req.query;
     const findUser = await User.find(
       { $or: [{ name: { $regex: text } }, { card_id: { $regex: text } }] },
-      { name: 1, card_id: 1, _id: 1,phone:1 }
+      { name: 1, card_id: 1, _id: 1, phone: 1 }
     );
     if (!findUser) res.send({ msg: "Usuario no encontrado." });
     res.send(findUser);
+  } catch (error: any) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+export const userSearchDB: RequestHandler = async (req, res) => {
+  if (debug) console.log("#userSearchDB");
+  try {
+    let { text, page, pageSize } = req.body;
+
+    page = parseInt(page, 10) || 1;
+    pageSize = parseInt(pageSize, 10) || 20;
+
+    const users = await User.aggregate([
+      {
+        $match: {
+          $or: [{ name: { $regex: text } }, { card_id: { $regex: text } }],
+        },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "totalCount" }],
+          data: [
+            { $skip: (page - 1) * pageSize },
+            { $limit: pageSize },
+            { $project: { _id: 1, name: 1, phone: 1, card_id: 1 } },
+          ],
+        },
+      },
+    ]);
+
+    // const findUser = await User.find(
+    //   { $or: [{ name: { $regex: text } }, { card_id: { $regex: text } }] },
+    //   { name: 1, card_id: 1, _id: 1,phone:1 }
+    // );
+    // if (!findUser) res.send({ msg: "Usuario no encontrado." });
+    res.send({
+      totalCount: users[0].metadata[0].totalCount,
+      page,
+      pageSize,
+      reached: (page - 1) * pageSize + users[0].data.length,
+      users: users[0].data,
+    });
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
   }
@@ -258,3 +317,4 @@ const emailMsg = (
   </body>
   `;
 };
+

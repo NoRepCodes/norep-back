@@ -24,24 +24,4 @@ app.use(admin_routes_1.default);
 app.listen(process.env.PORT || 4000, () => {
     console.log('Server listen on port', 4000);
 });
-// TO DO ✅ ❌ ⏳ ❓
-/**
-{
-  "name": "name",
-  "email": "youarelazy@empty.com",
-  "shirt": "S",
-  "birth": "1990-01-01",
-  "password": "_",
-  "card_id": "00000000",
-  "phone": "00000000000",
-  "genre": "Femenino",
-  "location": {
-    "country": "_",
-    "state": "_",
-    "city": "_ "
-  },
-  "box": "_"
-}
-
- */ 
 //# sourceMappingURL=index.js.map

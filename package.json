@@ -11,10 +11,13 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.19.2",
+    "googleapis": "^159.0.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.29.4",
     "mongoose": "^6.8.3",
     "nodemailer": "^6.9.14",
+    "puppeteer": "^24.18.0",
+    "resend": "^4.7.0",
     "uuid": "^9.0.0"
   },
   "scripts": {

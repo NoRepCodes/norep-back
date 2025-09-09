@@ -18,8 +18,9 @@ import Admin from "../models/adminSchema";
 import bcrypt from "bcrypt";
 import Ticket from "../models/ticketSchema";
 //@ts-ignore
-import nodemailer from "nodemailer";
+// import nodemailer from "nodemailer";
 import verifyBody from "../helpers/verifyBody";
+import { Resend } from "resend";
 
 const debug = true;
 
@@ -345,38 +346,20 @@ export const checkUsers: RequestHandler = async (req, res) => {
 export const sendEmail: RequestHandler = async (req, res) => {
   if (debug) console.log("#sendEmail");
   try {
-    let transporter = nodemailer.createTransport({
-      //lgippxsozkcbrovy
-      service: "yahoo",
-      auth: {
-        user: "norep.code@yahoo.com",
-        pass: "lgippxsozkcbrovy",
-      },
-    });
-
-    const ticket = { users: "66b68416b5a9026a6d13cb4d" };
+    const ticket = { users: "xx" };
     const users = await User.find({ _id: { $in: ticket.users } }, { email: 1 });
 
-    users.forEach((user) => {
-      let mailOptions = {
-        from: "norep.code@yahoo.com",
-        to: user.email,
-        subject: `Haz sido admitido en el evento STRONG ENDURANCE!`,
-        html: emailMsg(
-          "los odiosos",
-          "strong endurance",
-          "avanzado",
-          "66b4e80393c333245f375286"
-        ),
-      };
-      transporter.sendMail(mailOptions, (error: any, info: any) => {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log("Email sent: " + info.response);
-        }
-      });
+    const resend = new Resend(process.env.RESEND_API_KEY ?? "");
+    const userList = users.map((u) => u.email);
+    const { data, error } = await resend.emails.send({
+      from: "no-reply@norep.com.ve",
+      to: userList,
+      subject: "hello world",
+      html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
     });
+
+    if (error) return res.status(400).json({ error });
+
     res.send(users);
   } catch (error: any) {
     res.status(400).json({ msg: error.message });
@@ -438,15 +421,6 @@ export const pushTicket: RequestHandler = async (req, res) => {
 //     }
 //
 // }
-
-
-/**Buenos dias man, te doy un recuento de la semana, estuve intentado estilizar el correo de aprovación de equipo pero no logré mucho, no me deja usar estilos personalizados por el tipo de servicio que uso para enviar correos, muy poco me deja editar, de todas formas con ese poco que puedo, aún hay cosas que se podrían mejorar, alli te mando un ejemplo de lo que hice, queria como centrar el texto, cambiar el tipo de fuente... pero no se puede, en lo que si te podría pedir ayuda es que mas podemos decir, está muy sencillo y no sé que quisieran ustedes añadir allí.
- 
-Mas allá de eso me encontré unos erores al editar los wods, que se desaparecían al actualizar una categoría (ando en eso), y el diseño del registro para que esté todo visible sin necesidad de hacer scroll, y el mensaje al momento de registrarse a la categoría para que los usuarios entiendan que TODOS los participantes del equipo deben tener una sesión en NOREP. En general he pasado la semana revisando errores y haciendo pruebas con los wods, los correos, los tickets..., además de tenerle el ojo puesto a los usuarios que se registren pero nada, la pagina no ha tenido tráfico en lo absoluto, lo poco que veo estoy por pensar que he sido yo haciendo pruebas (no puedo ver cuantas personas han visitado la página pero si cuanto se ha consumido del servidor, y puedo almenos ver si hay mucho o poco tráfico).
-  
-En resumen, tengo los diseños del registro y el aviso para los usuarios, me avisas si tienes alguna idea para mejorar el mensaje del correo, y ando revisando errores, el viernes o jueves subo esta actualización y la pág debería de quedar limpia.
-*/
-
 
 const emailMsg = (
   team: string,
