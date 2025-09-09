@@ -10,40 +10,27 @@ import bcrypt from "bcrypt";
 import Admin from "../models/adminSchema";
 // import nodemailer from "nodemailer";
 import { Resend } from "resend";
+import versionChecker from "../helpers/versionChecker";
 
 dotenv.config();
 const debug = false;
 
-export const uri: RequestHandler = async (req, res) => {
-  if (debug) console.log("#test");
 
-  res.send("ok");
-};
 export const test: RequestHandler = async (req, res) => {
   if (debug) console.log("#test");
+  // console.log(await versionChecker());
 
-  // const resend = new Resend(process.env.RESEND_API_KEY ?? "");
-  // const { data, error } = await resend.emails.send({
-  //   from: "no-reply@norep.com.ve",
-  //   to: ["radulito19@gmail.com"],
-  //   subject: "hello world",
-  //   html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
-  // });
-  // if (error) console.log(error);
-  // console.log(data);
-
-  // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
-  // res.send('version 2.1.3')
-  // res.send(process.env.MONGODB_URI);
-  res.send("NOREP ONLINE");
+  res.send('test');
 };
 
 export const version: RequestHandler = async (req, res) => {
   try {
     const { cacheAdmin, cacheUser } = req.body;
     const url =
-      "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
-    const version = "4.3.2";
+      "https://play.google.com/store/apps/details?id=norep.app ";
+    // const url =
+    //   "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
+    const version = await versionChecker()
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
       : undefined;
@@ -297,8 +284,6 @@ export const getEmailExist: RequestHandler = async (req, res) => {
 
       if (error) throw new Error("No se ha podido enviar el correo.");
       else res.send({ itExist: true });
-
-      
     } else res.status(404).json({ msg: "El correo ingresado no existe." });
   } catch (error) {
     res.status(400).json({ msg: error.message });
@@ -356,6 +341,12 @@ export const eventsWithInfo: RequestHandler = async (req, res) => {
   }
 };
 
+//BLANK SERVER START
+export const isOn: RequestHandler = async (req, res) => {
+  if (debug) console.log("#test");
+  res.send("NOREP ONLINE");
+};
+
 const emailMsg = (
   team: string,
   event: string,
@@ -374,3 +365,32 @@ const emailMsg = (
   </body>
   `;
 };
+
+/**
+ * 
+
+  const url = "https://play.google.com/store/apps/details?id=com.fandom.playercompanion"
+  const browser = await puppeteer.launch({ headless: true }); // Launches in headless mode
+  // const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url);
+  const html = await page.content();
+  const element = (await page.$(`button[aria-label="See more information on About this app"]`)).evaluate(el=>el)
+
+  res.send(element)
+
+  // const btnSelector = `button[jscontroller="soHxf"]`
+
+  // await page.waitForSelector(btnSelector)
+  // await page.click(btnSelector)
+
+  // const modalSelector = `div[jscontroller="X6C1Be"]`
+  // await page.waitForSelector(modalSelector)
+
+  // // const versionText = await page.evaluate(()=>{
+  // await page.evaluate(()=>{
+  //   const elements = document.querySelectorAll("reAt0") 
+  //   console.log(elements);
+  // })
+
+ */

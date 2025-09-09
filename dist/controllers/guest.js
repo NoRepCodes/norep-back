@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eventsWithInfo = exports.changePassword = exports.getEmailExist = exports.getEventTable = exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventsPlusTeams = exports.getEvents = exports.registerUser = exports.login = exports.version = exports.test = exports.uri = void 0;
+exports.isOn = exports.eventsWithInfo = exports.changePassword = exports.getEmailExist = exports.getEventTable = exports.getLatestEvent = exports.cleanDupl = exports.searchTeam = exports.toggleUpdating = exports.getWods = exports.getEventsPlusTeams = exports.getEvents = exports.registerUser = exports.login = exports.version = exports.test = void 0;
 const eventSchema_1 = __importDefault(require("../models/eventSchema"));
 const userSchema_1 = __importDefault(require("../models/userSchema"));
 const t_1 = __importDefault(require("../models/t"));
@@ -34,37 +34,23 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const adminSchema_1 = __importDefault(require("../models/adminSchema"));
 // import nodemailer from "nodemailer";
 const resend_1 = require("resend");
+const versionChecker_1 = __importDefault(require("../helpers/versionChecker"));
 dotenv_1.default.config();
 const debug = false;
-const uri = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (debug)
-        console.log("#test");
-    res.send("ok");
-});
-exports.uri = uri;
 const test = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (debug)
         console.log("#test");
-    // const resend = new Resend(process.env.RESEND_API_KEY ?? "");
-    // const { data, error } = await resend.emails.send({
-    //   from: "no-reply@norep.com.ve",
-    //   to: ["radulito19@gmail.com"],
-    //   subject: "hello world",
-    //   html: emailMsg("Dignitas", "Breath", "Solitude", "idkhere"),
-    // });
-    // if (error) console.log(error);
-    // console.log(data);
-    // const result = await Event.find({ _id: "6656396c8f027cee3e114e68", 'categories.teams': { $exists: true, $type: 'array', $ne: [] } })
-    // res.send('version 2.1.3')
-    // res.send(process.env.MONGODB_URI);
-    res.send("NOREP ONLINE");
+    // console.log(await versionChecker());
+    res.send('test');
 });
 exports.test = test;
 const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cacheAdmin, cacheUser } = req.body;
-        const url = "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
-        const version = "4.3.2";
+        const url = "https://play.google.com/store/apps/details?id=norep.app ";
+        // const url =
+        //   "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
+        const version = yield (0, versionChecker_1.default)();
         const user = cacheUser
             ? yield userSchema_1.default.findById(cacheUser, { password: 0 })
             : undefined;
@@ -388,6 +374,13 @@ const eventsWithInfo = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.eventsWithInfo = eventsWithInfo;
+//BLANK SERVER START
+const isOn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (debug)
+        console.log("#test");
+    res.send("NOREP ONLINE");
+});
+exports.isOn = isOn;
 const emailMsg = (team, event, category, event_id) => {
     return `<body>
     <div style="width:500px;padding:2em;box-sizing:border-box">
@@ -401,4 +394,32 @@ const emailMsg = (team, event, category, event_id) => {
   </body>
   `;
 };
+/**
+ *
+
+  const url = "https://play.google.com/store/apps/details?id=com.fandom.playercompanion"
+  const browser = await puppeteer.launch({ headless: true }); // Launches in headless mode
+  // const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url);
+  const html = await page.content();
+  const element = (await page.$(`button[aria-label="See more information on About this app"]`)).evaluate(el=>el)
+
+  res.send(element)
+
+  // const btnSelector = `button[jscontroller="soHxf"]`
+
+  // await page.waitForSelector(btnSelector)
+  // await page.click(btnSelector)
+
+  // const modalSelector = `div[jscontroller="X6C1Be"]`
+  // await page.waitForSelector(modalSelector)
+
+  // // const versionText = await page.evaluate(()=>{
+  // await page.evaluate(()=>{
+  //   const elements = document.querySelectorAll("reAt0")
+  //   console.log(elements);
+  // })
+
+ */
 //# sourceMappingURL=guest.js.map
