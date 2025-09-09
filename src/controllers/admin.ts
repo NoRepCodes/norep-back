@@ -86,7 +86,6 @@ export const updateTeamInfo: RequestHandler = async (req, res) => {
 //     const {categ_id,tname,cards,team_id} = req.body
 //     const users = await User.find({card_id:cards},{_id:1})
 //     const userList = users.map((u)=>u._id)
-
 //     res.send(userList)
 //   } catch (error: any) {
 //     res.status(400).json({ msg: error.message });
