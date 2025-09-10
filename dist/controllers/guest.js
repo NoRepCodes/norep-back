@@ -50,8 +50,7 @@ const version = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const url = "https://play.google.com/store/apps/details?id=norep.app ";
         // const url =
         //   "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
-        const version = "0"
-        // const version = yield (0, versionChecker_1.default)();
+        const version = yield (0, versionChecker_1.default)();
         const user = cacheUser
             ? yield userSchema_1.default.findById(cacheUser, { password: 0 })
             : undefined;
