@@ -28,8 +28,6 @@ export const version: RequestHandler = async (req, res) => {
     const { cacheAdmin, cacheUser } = req.body;
     const url =
       "https://play.google.com/store/apps/details?id=norep.app ";
-    // const url =
-    //   "https://drive.google.com/drive/folders/1ZEUi-74rt705xVN5gTvS68fE811Hzx3G";
     const version = await versionChecker()
     const user = cacheUser
       ? await User.findById(cacheUser, { password: 0 })
